@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+backend/venv/
+
+# Angular
+node_modules/
+.angular/
+frontend/node_modules/
+frontend/.angular/
+.tmp/
+out-tsc/
+npm-debug.log
+yarn-error.log
+frontend/dist/
+
+# IDE
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/
+
+# Environment
+.env
+.venv
+env/
+ENV/
+
+# OS
+.DS_Store
+Thumbs.db 

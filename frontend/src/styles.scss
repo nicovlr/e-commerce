@@ -1,0 +1,81 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  justify-content: space-between;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.ml-2 {
+  margin-left: 1rem;
+}
+
+.mr-2 {
+  margin-right: 1rem;
+}
+
+.p-2 {
+  padding: 1rem;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+// Snackbar styles
+.success-snackbar {
+  background: #4caf50;
+  color: white;
+}
+
+.error-snackbar {
+  background: #f44336;
+  color: white;
+}
+
+.success-snackbar .mat-simple-snackbar-action,
+.error-snackbar .mat-simple-snackbar-action {
+  color: white;
+}
+
+// Responsive utilities
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* Add any additional global styles below */
