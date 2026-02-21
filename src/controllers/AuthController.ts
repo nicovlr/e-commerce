@@ -3,10 +3,22 @@ import { Request, Response } from 'express';
 import { AuthService } from '../services/AuthService';
 import { AuthRequest } from '../types';
 
+interface RegisterBody {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  register = async (req: Request, res: Response): Promise<void> => {
+  register = async (req: Request<unknown, unknown, RegisterBody>, res: Response): Promise<void> => {
     try {
       const result = await this.authService.register(req.body);
       res.status(201).json(result);
@@ -17,7 +29,7 @@ export class AuthController {
     }
   };
 
-  login = async (req: Request, res: Response): Promise<void> => {
+  login = async (req: Request<unknown, unknown, LoginBody>, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
       const result = await this.authService.login(email, password);
@@ -37,7 +49,7 @@ export class AuthController {
         return;
       }
       res.json(user);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch profile' });
     }
   };

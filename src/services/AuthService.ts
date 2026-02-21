@@ -11,6 +11,14 @@ interface TokenPayload {
   role: string;
 }
 
+type UserWithoutPassword = Omit<User, 'password'>;
+
+function stripPassword(user: User): UserWithoutPassword {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, ...rest } = user;
+  return rest as UserWithoutPassword;
+}
+
 export class AuthService {
   constructor(private readonly userRepository: UserRepository) {}
 
@@ -19,7 +27,7 @@ export class AuthService {
     password: string;
     firstName: string;
     lastName: string;
-  }): Promise<{ user: Omit<User, 'password'>; token: string }> {
+  }): Promise<{ user: UserWithoutPassword; token: string }> {
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new Error('Email already registered');
@@ -32,15 +40,13 @@ export class AuthService {
     });
 
     const token = this.generateToken(user);
-    const { password: _, ...userWithoutPassword } = user;
-
-    return { user: userWithoutPassword as Omit<User, 'password'>, token };
+    return { user: stripPassword(user), token };
   }
 
   async login(
     email: string,
     password: string,
-  ): Promise<{ user: Omit<User, 'password'>; token: string }> {
+  ): Promise<{ user: UserWithoutPassword; token: string }> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new Error('Invalid credentials');
@@ -52,17 +58,13 @@ export class AuthService {
     }
 
     const token = this.generateToken(user);
-    const { password: _, ...userWithoutPassword } = user;
-
-    return { user: userWithoutPassword as Omit<User, 'password'>, token };
+    return { user: stripPassword(user), token };
   }
 
-  async getUserById(id: number): Promise<Omit<User, 'password'> | null> {
+  async getUserById(id: number): Promise<UserWithoutPassword | null> {
     const user = await this.userRepository.findById(id);
     if (!user) return null;
-
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword as Omit<User, 'password'>;
+    return stripPassword(user);
   }
 
   private generateToken(user: User): string {

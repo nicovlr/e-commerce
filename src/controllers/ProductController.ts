@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { Product } from '../models/Product';
 import { ProductService } from '../services/ProductService';
 import { ProductFilter } from '../types';
 
@@ -18,7 +19,7 @@ export class ProductController {
 
       const products = await this.productService.getAllProducts(filters);
       res.json(products);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch products' });
     }
   };
@@ -31,21 +32,27 @@ export class ProductController {
         return;
       }
       res.json(product);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch product' });
     }
   };
 
-  create = async (req: Request, res: Response): Promise<void> => {
+  create = async (
+    req: Request<unknown, unknown, Partial<Product>>,
+    res: Response,
+  ): Promise<void> => {
     try {
       const product = await this.productService.createProduct(req.body);
       res.status(201).json(product);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to create product' });
     }
   };
 
-  update = async (req: Request, res: Response): Promise<void> => {
+  update = async (
+    req: Request<{ id: string }, unknown, Partial<Product>>,
+    res: Response,
+  ): Promise<void> => {
     try {
       const product = await this.productService.updateProduct(Number(req.params.id), req.body);
       if (!product) {
@@ -53,7 +60,7 @@ export class ProductController {
         return;
       }
       res.json(product);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to update product' });
     }
   };
@@ -66,7 +73,7 @@ export class ProductController {
         return;
       }
       res.status(204).send();
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to delete product' });
     }
   };
@@ -75,7 +82,7 @@ export class ProductController {
     try {
       const products = await this.productService.getLowStockProducts();
       res.json(products);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch low stock products' });
     }
   };

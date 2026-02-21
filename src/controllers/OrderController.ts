@@ -3,12 +3,21 @@ import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
 import { AuthRequest } from '../types';
 
+interface CreateOrderBody {
+  items: Array<{ productId: number; quantity: number }>;
+}
+
+interface UpdateStatusBody {
+  status: string;
+}
+
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   create = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const order = await this.orderService.createOrder(req.userId!, req.body.items);
+      const { items } = req.body as CreateOrderBody;
+      const order = await this.orderService.createOrder(req.userId!, items);
       res.status(201).json(order);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create order';
@@ -24,7 +33,7 @@ export class OrderController {
         return;
       }
       res.json(order);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch order' });
     }
   };
@@ -33,12 +42,15 @@ export class OrderController {
     try {
       const orders = await this.orderService.getUserOrders(req.userId!);
       res.json(orders);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch orders' });
     }
   };
 
-  updateStatus = async (req: Request, res: Response): Promise<void> => {
+  updateStatus = async (
+    req: Request<{ id: string }, unknown, UpdateStatusBody>,
+    res: Response,
+  ): Promise<void> => {
     try {
       const order = await this.orderService.updateOrderStatus(
         Number(req.params.id),
@@ -49,7 +61,7 @@ export class OrderController {
         return;
       }
       res.json(order);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to update order status' });
     }
   };

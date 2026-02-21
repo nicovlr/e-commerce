@@ -1,5 +1,5 @@
-import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
+import { DataSource } from 'typeorm';
 
 import { Category } from '../models/Category';
 import { Order } from '../models/Order';

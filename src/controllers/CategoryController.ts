@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { Category } from '../models/Category';
 import { CategoryService } from '../services/CategoryService';
 
 export class CategoryController {
@@ -9,7 +10,7 @@ export class CategoryController {
     try {
       const categories = await this.categoryService.getAllCategories();
       res.json(categories);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch categories' });
     }
   };
@@ -22,21 +23,27 @@ export class CategoryController {
         return;
       }
       res.json(category);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch category' });
     }
   };
 
-  create = async (req: Request, res: Response): Promise<void> => {
+  create = async (
+    req: Request<unknown, unknown, Partial<Category>>,
+    res: Response,
+  ): Promise<void> => {
     try {
       const category = await this.categoryService.createCategory(req.body);
       res.status(201).json(category);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to create category' });
     }
   };
 
-  update = async (req: Request, res: Response): Promise<void> => {
+  update = async (
+    req: Request<{ id: string }, unknown, Partial<Category>>,
+    res: Response,
+  ): Promise<void> => {
     try {
       const category = await this.categoryService.updateCategory(Number(req.params.id), req.body);
       if (!category) {
@@ -44,7 +51,7 @@ export class CategoryController {
         return;
       }
       res.json(category);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to update category' });
     }
   };
@@ -57,7 +64,7 @@ export class CategoryController {
         return;
       }
       res.status(204).send();
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to delete category' });
     }
   };

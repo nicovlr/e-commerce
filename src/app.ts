@@ -56,13 +56,16 @@ export function createApp(): Application {
   const aiController = new AIController(aiService);
 
   // Routes
-  app.use('/api', createApiRoutes(
-    productController,
-    authController,
-    orderController,
-    categoryController,
-    aiController,
-  ));
+  app.use(
+    '/api',
+    createApiRoutes(
+      productController,
+      authController,
+      orderController,
+      categoryController,
+      aiController,
+    ),
+  );
 
   // Error handling
   app.use(errorMiddleware);

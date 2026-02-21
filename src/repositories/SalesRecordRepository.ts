@@ -1,8 +1,13 @@
-import { Repository, Between } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 
 import { SalesRecord } from '../models/SalesRecord';
 
 import { BaseRepository } from './BaseRepository';
+
+interface SalesSummaryRaw {
+  totalSold: string | null;
+  avgDaily: string | null;
+}
 
 export class SalesRecordRepository extends BaseRepository<SalesRecord> {
   constructor(repository: Repository<SalesRecord>) {
@@ -29,7 +34,7 @@ export class SalesRecordRepository extends BaseRepository<SalesRecord> {
   async getProductSalesSummary(
     productId: number,
   ): Promise<{ totalSold: number; avgDaily: number }> {
-    const result = await this.repository
+    const result: SalesSummaryRaw | undefined = await this.repository
       .createQueryBuilder('sale')
       .select('SUM(sale.quantitySold)', 'totalSold')
       .addSelect('AVG(sale.quantitySold)', 'avgDaily')
@@ -37,8 +42,8 @@ export class SalesRecordRepository extends BaseRepository<SalesRecord> {
       .getRawOne();
 
     return {
-      totalSold: parseFloat(result?.totalSold || '0'),
-      avgDaily: parseFloat(result?.avgDaily || '0'),
+      totalSold: parseFloat(result?.totalSold ?? '0'),
+      avgDaily: parseFloat(result?.avgDaily ?? '0'),
     };
   }
 }

@@ -2,10 +2,14 @@ import { Request, Response } from 'express';
 
 import { AIService } from '../services/AIService';
 
+interface PredictBody {
+  productId?: number;
+}
+
 export class AIController {
   constructor(private readonly aiService: AIService) {}
 
-  predict = async (req: Request, res: Response): Promise<void> => {
+  predict = async (req: Request<unknown, unknown, PredictBody>, res: Response): Promise<void> => {
     try {
       const { productId } = req.body;
       if (!productId) {
@@ -14,7 +18,7 @@ export class AIController {
       }
       const prediction = await this.aiService.getPrediction(Number(productId));
       res.json(prediction);
-    } catch (error) {
+    } catch {
       res.status(503).json({
         error: 'AI service unavailable',
         message: 'The demand prediction service is currently offline',
@@ -26,7 +30,7 @@ export class AIController {
     try {
       const alerts = await this.aiService.getStockAlerts();
       res.json(alerts);
-    } catch (error) {
+    } catch {
       res.status(503).json({
         error: 'AI service unavailable',
         message: 'The stock alert service is currently offline',
