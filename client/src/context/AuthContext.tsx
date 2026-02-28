@@ -36,6 +36,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadUser();
   }, [loadUser]);
 
+  useEffect(() => {
+    const handleForceLogout = () => {
+      setUser(null);
+    };
+    window.addEventListener('auth:logout', handleForceLogout);
+    return () => window.removeEventListener('auth:logout', handleForceLogout);
+  }, []);
+
   const login = async (credentials: LoginCredentials) => {
     const response = await authService.login(credentials);
     localStorage.setItem('token', response.token);

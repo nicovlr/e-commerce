@@ -44,14 +44,12 @@ const CartPage: React.FC = () => {
 
     try {
       const orderItems = items.map((item) => ({
-        product_id: item.product.id,
+        productId: item.product.id,
         quantity: item.quantity,
-        price: item.product.price,
       }));
 
       await api.post('/orders', {
         items: orderItems,
-        total_amount: total,
       });
 
       clearCart();
