@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { AIController } from '../controllers/AIController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
 
 export const createAIRoutes = (controller: AIController): Router => {
   const router = Router();
@@ -46,7 +46,7 @@ export const createAIRoutes = (controller: AIController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/ServiceUnavailableError'
    */
-  router.post('/predict', authMiddleware, controller.predict);
+  router.post('/predict', authMiddleware, requireStaff, controller.predict);
 
   /**
    * @swagger
@@ -78,7 +78,7 @@ export const createAIRoutes = (controller: AIController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/ServiceUnavailableError'
    */
-  router.get('/alerts', authMiddleware, controller.getAlerts);
+  router.get('/alerts', authMiddleware, requireStaff, controller.getAlerts);
 
   /**
    * @swagger

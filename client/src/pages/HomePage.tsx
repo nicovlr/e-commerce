@@ -36,30 +36,36 @@ const HomePage: React.FC = () => {
       <JsonLd data={getWebSiteSchema()} />
       <section className="hero">
         <div className="hero-content">
-          <h1>Welcome to ShopSmart</h1>
+          <span className="hero-eyebrow">New Collection 2026</span>
+          <h1>Discover <em>Premium</em> Products</h1>
           <p>
-            Your AI-powered shopping destination. Discover amazing products with intelligent
-            inventory management and demand forecasting.
+            Curated collections of exceptional products, designed for those who appreciate
+            quality, elegance, and attention to detail.
           </p>
           <div className="hero-actions">
             <Link to="/products" className="btn btn-primary btn-lg">
-              Browse Products
+              Explore the Collection
             </Link>
-            <Link to="/dashboard" className="btn btn-outline btn-lg">
-              AI Dashboard
+            <Link to="/products" className="btn btn-outline btn-lg">
+              View Catalogue
             </Link>
           </div>
+        </div>
+        <div className="hero-scroll-cue">
+          <span>Scroll</span>
+          <svg width="14" height="20" viewBox="0 0 14 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="12" height="18" rx="6" stroke="currentColor" strokeWidth="1.2"/>
+            <circle cx="7" cy="6" r="1.5" fill="currentColor">
+              <animateTransform attributeName="transform" type="translate"
+                values="0,0; 0,5; 0,0" dur="2s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
         </div>
       </section>
 
       <section className="section">
         <div className="container">
-          <div className="section-header">
-            <h2>Featured Products</h2>
-            <Link to="/products" className="btn btn-outline">
-              View All
-            </Link>
-          </div>
+          <h2 className="section-title-decorated">Our Selection</h2>
 
           {loading && (
             <div className="loading-container">
@@ -83,32 +89,40 @@ const HomePage: React.FC = () => {
               <p>No products available yet. Check back soon!</p>
             </div>
           )}
+
+          {!loading && !error && featuredProducts.length > 0 && (
+            <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+              <Link to="/products" className="btn btn-outline btn-lg">
+                View All Products
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
       <section className="section features-section">
         <div className="container">
-          <h2 className="text-center">Why ShopSmart?</h2>
+          <h2 className="section-title-decorated">Why ShopSmart?</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">&#x1f4ca;</div>
-              <h3>AI-Powered Insights</h3>
+              <div className="feature-icon">&#x1f4e6;</div>
+              <h3>Free Shipping</h3>
               <p>
-                Smart demand prediction and inventory management powered by machine learning.
+                Complimentary delivery on all orders. Your items arrive safely at your doorstep.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">&#x1f6d2;</div>
-              <h3>Easy Shopping</h3>
+              <div className="feature-icon">&#x1f512;</div>
+              <h3>Secure Payment</h3>
               <p>
-                Browse, filter, and purchase products with a clean and intuitive interface.
+                Your transactions are protected with industry-leading encryption technology.
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">&#x1f514;</div>
-              <h3>Stock Alerts</h3>
+              <div className="feature-icon">&#x2728;</div>
+              <h3>Premium Quality</h3>
               <p>
-                Real-time alerts for low stock, trending items, and inventory optimization.
+                Every product is carefully selected to meet the highest standards of excellence.
               </p>
             </div>
           </div>

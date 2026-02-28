@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
+import { getPlaceholderEmoji } from '../utils/categoryEmoji';
 
-const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/300x200?text=No+Image';
 const LOW_STOCK_THRESHOLD = 5;
 
 interface ProductCardProps {
@@ -12,31 +12,40 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
   const { addItem } = useCart();
+  const [imgError, setImgError] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     addItem(product);
   };
 
-  const imageUrl = product.imageUrl || PLACEHOLDER_IMAGE;
+  const hasImage = product.imageUrl && product.imageUrl.trim() !== '' && !imgError;
 
   return (
     <div className="product-card">
       <Link to={`/products/${product.id}`} className="product-card-link">
         <div className="product-image-wrapper">
-          <img
-            src={imageUrl}
-            alt={product.name}
-            className="product-image"
-            loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
-            }}
-          />
+          {hasImage ? (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="product-image"
+              loading="lazy"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <span className="product-placeholder">
+              {getPlaceholderEmoji(product.category?.name)}
+            </span>
+          )}
           {product.stock <= LOW_STOCK_THRESHOLD && product.stock > 0 && (
             <span className="stock-badge low-stock">Low Stock</span>
           )}
           {product.stock === 0 && <span className="stock-badge out-of-stock">Out of Stock</span>}
+          <div className="product-card-overlay">
+            <span>View</span>
+          </div>
         </div>
         <div className="product-info">
           <h3 className="product-name">{product.name}</h3>

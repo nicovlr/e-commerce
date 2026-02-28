@@ -19,6 +19,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const saved = localStorage.getItem('cart');
       return saved ? JSON.parse(saved) : [];
     } catch {
+      localStorage.removeItem('cart');
       return [];
     }
   });

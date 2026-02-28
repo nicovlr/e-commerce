@@ -2,6 +2,7 @@ import { Request } from 'express';
 
 export interface AuthRequest extends Request {
   userId?: number;
+  userRole?: 'customer' | 'manager' | 'admin';
 }
 
 export interface PaginationQuery {
@@ -68,6 +69,7 @@ export interface ShippingAddress {
 
 export enum UserRole {
   CUSTOMER = 'customer',
+  MANAGER = 'manager',
   ADMIN = 'admin',
 }
 

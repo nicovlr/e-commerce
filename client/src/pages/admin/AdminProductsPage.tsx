@@ -11,6 +11,7 @@ const AdminProductsPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', imageUrl: '', categoryId: '' });
+  const [search, setSearch] = useState('');
   const { showToast } = useToast();
 
   const fetchData = useCallback(async () => {
@@ -29,6 +30,10 @@ const AdminProductsPage: React.FC = () => {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const filtered = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const openCreate = () => {
     setEditingProduct(null);
@@ -97,6 +102,19 @@ const AdminProductsPage: React.FC = () => {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      <div className="admin-filter-bar">
+        <input
+          type="text"
+          className="input admin-search"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+          {filtered.length} product{filtered.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
       <div className="admin-table-wrapper">
         <table className="admin-table">
           <thead>
@@ -106,19 +124,21 @@ const AdminProductsPage: React.FC = () => {
               <th>Category</th>
               <th>Price</th>
               <th>Stock</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {products.map(p => (
+            {filtered.map(p => (
               <tr key={p.id}>
                 <td>{p.id}</td>
-                <td>{p.name}</td>
+                <td style={{ fontWeight: 500 }}>{p.name}</td>
                 <td>{categories.find(c => c.id === p.categoryId)?.name || '-'}</td>
                 <td>${Number(p.price).toFixed(2)}</td>
+                <td>{p.stock}</td>
                 <td>
                   <span className={`status-badge ${p.stock === 0 ? 'status-danger' : p.stock < 10 ? 'status-warning' : 'status-success'}`}>
-                    {p.stock}
+                    {p.stock === 0 ? 'Out of Stock' : p.stock < 10 ? 'Low Stock' : 'In Stock'}
                   </span>
                 </td>
                 <td>
@@ -129,6 +149,9 @@ const AdminProductsPage: React.FC = () => {
                 </td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No products found.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

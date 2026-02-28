@@ -6,16 +6,9 @@ import { logger } from '../config/logger';
 import { User } from '../models/User';
 import { UserRepository } from '../repositories/UserRepository';
 import { TokenPayload } from '../types';
+import { UserWithoutPassword, stripPassword } from '../utils/stripPassword';
 
 import { PostHogService } from './PostHogService';
-
-type UserWithoutPassword = Omit<User, 'password'>;
-
-function stripPassword(user: User): UserWithoutPassword {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...rest } = user;
-  return rest as UserWithoutPassword;
-}
 
 export class AuthService {
   constructor(
@@ -83,8 +76,9 @@ export class AuthService {
   }
 
   private generateToken(user: User): string {
-    const payload: TokenPayload = {
+    const payload: TokenPayload & { role: string } = {
       userId: user.id,
+      role: user.role,
     };
 
     return jwt.sign(payload, config.jwt.secret, {

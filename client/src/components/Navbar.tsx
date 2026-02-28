@@ -11,6 +11,8 @@ const Navbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
+  const isStaff = user?.role === 'manager' || user?.role === 'admin';
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -42,8 +44,6 @@ const Navbar: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [adminOpen, closeDropdown]);
 
-  const isAdmin = user?.role === 'admin';
-
   return (
     <nav className="navbar" aria-label="Main navigation">
       <div className="navbar-container">
@@ -58,12 +58,12 @@ const Navbar: React.FC = () => {
           <Link to="/products" className="nav-link">
             Products
           </Link>
-          {isAuthenticated && !isAdmin && (
+          {isAuthenticated && !isStaff && (
             <Link to="/orders" className="nav-link">
               Orders
             </Link>
           )}
-          {isAuthenticated && isAdmin && (
+          {isAuthenticated && isStaff && (
             <div className="admin-dropdown" ref={dropdownRef}>
               <button
                 ref={toggleRef}
@@ -77,6 +77,9 @@ const Navbar: React.FC = () => {
               </button>
               {adminOpen && (
                 <div className="admin-dropdown-menu" role="menu">
+                  <Link to="/admin/dashboard" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
+                    Dashboard
+                  </Link>
                   <Link to="/admin/products" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
                     Products
                   </Link>
@@ -88,9 +91,6 @@ const Navbar: React.FC = () => {
                   </Link>
                   <Link to="/analytics" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
                     Analytics
-                  </Link>
-                  <Link to="/dashboard" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
-                    Dashboard IA
                   </Link>
                 </div>
               )}
@@ -105,14 +105,14 @@ const Navbar: React.FC = () => {
 
           {isAuthenticated ? (
             <div className="auth-section">
-              <span className="user-name">{user?.name}</span>
+              <span className="user-name">{user?.firstName}</span>
               <button onClick={handleLogout} className="btn btn-outline" aria-label="Logout">
                 Logout
               </button>
             </div>
           ) : (
-            <Link to="/login" className="btn btn-primary">
-              Login
+            <Link to="/login" className="btn btn-primary btn-sm">
+              Sign In
             </Link>
           )}
         </div>

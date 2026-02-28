@@ -89,7 +89,7 @@ const ProductsPage: React.FC = () => {
       ])} />
       <JsonLd data={getProductListSchema(sortedProducts)} />
       <div className="container">
-        <h1>Products</h1>
+        <h1>Our Products</h1>
 
         {error && <div className="alert alert-error">{error}</div>}
 

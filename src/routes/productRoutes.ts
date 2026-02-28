@@ -1,10 +1,10 @@
-import { Router, RequestHandler } from 'express';
+import { Router } from 'express';
 
 import { ProductController } from '../controllers/ProductController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
 import { validateId, validateProduct, validateProductQuery } from '../middleware/validationMiddleware';
 
-export const createProductRoutes = (controller: ProductController, adminMiddleware: RequestHandler): Router => {
+export const createProductRoutes = (controller: ProductController): Router => {
   const router = Router();
 
   /**
@@ -99,7 +99,7 @@ export const createProductRoutes = (controller: ProductController, adminMiddlewa
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/low-stock', authMiddleware, controller.getLowStock);
+  router.get('/low-stock', authMiddleware, requireStaff, controller.getLowStock);
 
   /**
    * @swagger
@@ -183,7 +183,7 @@ export const createProductRoutes = (controller: ProductController, adminMiddlewa
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.post('/', authMiddleware, adminMiddleware, validateProduct, controller.create);
+  router.post('/', authMiddleware, requireStaff, validateProduct, controller.create);
 
   /**
    * @swagger
@@ -239,7 +239,7 @@ export const createProductRoutes = (controller: ProductController, adminMiddlewa
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.put('/:id', authMiddleware, adminMiddleware, validateId, validateProduct, controller.update);
+  router.put('/:id', authMiddleware, requireStaff, validateId, validateProduct, controller.update);
 
   /**
    * @swagger
@@ -285,7 +285,7 @@ export const createProductRoutes = (controller: ProductController, adminMiddlewa
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.delete('/:id', authMiddleware, adminMiddleware, validateId, controller.remove);
+  router.delete('/:id', authMiddleware, requireStaff, validateId, controller.remove);
 
   return router;
 };

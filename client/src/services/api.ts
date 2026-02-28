@@ -26,13 +26,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
+      window.dispatchEvent(new CustomEvent('auth:logout'));
     }
-    if (error.response?.status === 403) {
-      window.location.href = '/';
-    }
+    // 403 errors are handled by individual components (e.g. admin pages)
+    // Do NOT redirect globally — managers legitimately get 403 on admin-only endpoints
     return Promise.reject(error);
   }
 );

@@ -104,6 +104,9 @@ const AdminCategoriesPage: React.FC = () => {
                 </td>
               </tr>
             ))}
+            {categories.length === 0 && (
+              <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No categories yet.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

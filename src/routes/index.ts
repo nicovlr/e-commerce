@@ -6,7 +6,7 @@ import { AuthController } from '../controllers/AuthController';
 import { CategoryController } from '../controllers/CategoryController';
 import { OrderController } from '../controllers/OrderController';
 import { ProductController } from '../controllers/ProductController';
-import { createAdminMiddleware } from '../middleware/adminMiddleware';
+import { UserController } from '../controllers/UserController';
 
 import { createAIRoutes } from './aiRoutes';
 import { createAnalyticsRoutes } from './analyticsRoutes';
@@ -14,6 +14,7 @@ import { createAuthRoutes } from './authRoutes';
 import { createCategoryRoutes } from './categoryRoutes';
 import { createOrderRoutes } from './orderRoutes';
 import { createProductRoutes } from './productRoutes';
+import { createUserRoutes } from './userRoutes';
 
 export const createApiRoutes = (
   productController: ProductController,
@@ -21,17 +22,18 @@ export const createApiRoutes = (
   orderController: OrderController,
   categoryController: CategoryController,
   aiController: AIController,
+  userController: UserController,
   analyticsController: AnalyticsController,
-  adminMiddleware: ReturnType<typeof createAdminMiddleware>,
 ): Router => {
   const router = Router();
 
-  router.use('/products', createProductRoutes(productController, adminMiddleware));
+  router.use('/products', createProductRoutes(productController));
   router.use('/auth', createAuthRoutes(authController));
-  router.use('/orders', createOrderRoutes(orderController, adminMiddleware));
-  router.use('/categories', createCategoryRoutes(categoryController, adminMiddleware));
+  router.use('/orders', createOrderRoutes(orderController));
+  router.use('/categories', createCategoryRoutes(categoryController));
   router.use('/ai', createAIRoutes(aiController));
-  router.use('/analytics', createAnalyticsRoutes(analyticsController, adminMiddleware));
+  router.use('/users', createUserRoutes(userController));
+  router.use('/analytics', createAnalyticsRoutes(analyticsController));
 
   return router;
 };

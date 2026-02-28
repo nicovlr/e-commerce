@@ -1,17 +1,41 @@
-import { Router, RequestHandler } from 'express';
+import { Router } from 'express';
 
 import { OrderController } from '../controllers/OrderController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
 import { validateCheckout, validateId, validateOrder, validatePagination } from '../middleware/validationMiddleware';
 
-export const createOrderRoutes = (controller: OrderController, adminMiddleware: RequestHandler): Router => {
+export const createOrderRoutes = (controller: OrderController): Router => {
   const router = Router();
+
+  /**
+   * @swagger
+   * /orders/checkout:
+   *   post:
+   *     summary: Checkout with Stripe payment
+   *     tags: [Orders]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CheckoutRequest'
+   *     responses:
+   *       201:
+   *         description: Checkout initiated successfully
+   *       400:
+   *         description: Validation error or insufficient stock
+   *       401:
+   *         description: Unauthorized - missing or invalid token
+   */
+  router.post('/checkout', authMiddleware, validateCheckout, controller.checkout);
 
   /**
    * @swagger
    * /orders:
    *   get:
-   *     summary: Get all orders (admin only)
+   *     summary: Get all orders (staff only)
    *     tags: [Orders]
    *     security:
    *       - bearerAuth: []
@@ -31,7 +55,7 @@ export const createOrderRoutes = (controller: OrderController, adminMiddleware: 
    *             schema:
    *               $ref: '#/components/schemas/Error'
    *       403:
-   *         description: Forbidden - admin access required
+   *         description: Forbidden - staff access required
    *         content:
    *           application/json:
    *             schema:
@@ -43,9 +67,7 @@ export const createOrderRoutes = (controller: OrderController, adminMiddleware: 
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.post('/checkout', authMiddleware, validateCheckout, controller.checkout);
-
-  router.get('/', authMiddleware, adminMiddleware, validatePagination, controller.getAll);
+  router.get('/', authMiddleware, requireStaff, validatePagination, controller.getAll);
 
   /**
    * @swagger
@@ -225,7 +247,7 @@ export const createOrderRoutes = (controller: OrderController, adminMiddleware: 
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.patch('/:id/status', authMiddleware, adminMiddleware, validateId, controller.updateStatus);
+  router.patch('/:id/status', authMiddleware, requireStaff, validateId, controller.updateStatus);
 
   return router;
 };

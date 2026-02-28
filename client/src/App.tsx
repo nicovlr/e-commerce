@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
@@ -13,7 +13,6 @@ const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const AnalyticsDashboardPage = lazy(() => import('./pages/AnalyticsDashboardPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
@@ -21,9 +20,11 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Admin pages
 const AdminLayout = lazy(() => import('./components/AdminLayout'));
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
 const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage'));
 const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'));
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
 
 const LoadingFallback: React.FC = () => (
   <div className="loading-container">
@@ -55,18 +56,11 @@ const App: React.FC = () => {
                     }
                   />
                   <Route path="login" element={<LoginPage />} />
-                  <Route
-                    path="dashboard"
-                    element={
-                      <ProtectedRoute requiredRole="admin">
-                        <DashboardPage />
-                      </ProtectedRoute>
-                    }
-                  />
+                  <Route path="dashboard" element={<Navigate to="/admin/dashboard" replace />} />
                   <Route
                     path="analytics"
                     element={
-                      <ProtectedRoute requiredRole="admin">
+                      <ProtectedRoute requiredRole="staff">
                         <AnalyticsDashboardPage />
                       </ProtectedRoute>
                     }
@@ -82,14 +76,24 @@ const App: React.FC = () => {
                   <Route
                     path="admin"
                     element={
-                      <ProtectedRoute requiredRole="admin">
+                      <ProtectedRoute requiredRole="staff">
                         <AdminLayout />
                       </ProtectedRoute>
                     }
                   >
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboardPage />} />
                     <Route path="products" element={<AdminProductsPage />} />
-                    <Route path="orders" element={<AdminOrdersPage />} />
                     <Route path="categories" element={<AdminCategoriesPage />} />
+                    <Route path="orders" element={<AdminOrdersPage />} />
+                    <Route
+                      path="users"
+                      element={
+                        <ProtectedRoute requiredRole="admin">
+                          <AdminUsersPage />
+                        </ProtectedRoute>
+                      }
+                    />
                   </Route>
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>

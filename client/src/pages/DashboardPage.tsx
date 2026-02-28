@@ -3,6 +3,19 @@ import { Product, DemandPrediction, StockAlert } from '../types';
 import { productService } from '../services/productService';
 import { aiService } from '../services/aiService';
 
+const getAlertTypeLabel = (alertType: string): string => {
+  switch (alertType) {
+    case 'low_stock':
+      return 'Low Stock';
+    case 'overstock':
+      return 'Overstock';
+    case 'trending':
+      return 'Trending';
+    default:
+      return alertType;
+  }
+};
+
 const DashboardPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [alerts, setAlerts] = useState<StockAlert[]>([]);
@@ -58,28 +71,16 @@ const DashboardPage: React.FC = () => {
   const getSeverityClass = (severity: string): string => {
     switch (severity) {
       case 'critical':
-        return 'severity-critical';
       case 'high':
-        return 'severity-high';
+        return 'severity-critical';
+      case 'warning':
       case 'medium':
-        return 'severity-medium';
+        return 'severity-warning';
+      case 'info':
       case 'low':
-        return 'severity-low';
+        return 'severity-info';
       default:
         return '';
-    }
-  };
-
-  const getAlertTypeLabel = (type: string): string => {
-    switch (type) {
-      case 'low_stock':
-        return 'Low Stock';
-      case 'overstock':
-        return 'Overstock';
-      case 'trending':
-        return 'Trending';
-      default:
-        return type;
     }
   };
 
@@ -141,9 +142,7 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <div className="prediction-card">
                   <span className="prediction-label">Confidence</span>
-                  <span className="prediction-value">
-                    {(prediction.confidence * 100).toFixed(1)}%
-                  </span>
+                  <span className="prediction-value">{(prediction.confidence * 100).toFixed(0)}%</span>
                 </div>
               </div>
               <div className="recommendation-box">
@@ -172,8 +171,8 @@ const DashboardPage: React.FC = () => {
 
           {!loadingAlerts && alerts.length > 0 && (
             <div className="alerts-list">
-              {alerts.map((alert) => (
-                <div key={alert.id} className={`alert-card ${getSeverityClass(alert.severity)}`}>
+              {alerts.map((alert, index) => (
+                <div key={index} className={`alert-card ${getSeverityClass(alert.severity)}`}>
                   <div className="alert-card-header">
                     <span className="alert-type-badge">{getAlertTypeLabel(alert.alertType)}</span>
                     <span className={`severity-badge ${getSeverityClass(alert.severity)}`}>

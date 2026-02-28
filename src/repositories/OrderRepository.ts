@@ -48,6 +48,13 @@ export class OrderRepository extends BaseRepository<Order> {
     });
   }
 
+  async findAllWithItems(): Promise<Order[]> {
+    return this.repository.find({
+      relations: ['items', 'items.product', 'user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findByPaymentIntentId(stripePaymentIntentId: string): Promise<Order | null> {
     return this.repository.findOne({
       where: { stripePaymentIntentId },

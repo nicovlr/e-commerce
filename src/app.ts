@@ -15,8 +15,8 @@ import { AuthController } from './controllers/AuthController';
 import { CategoryController } from './controllers/CategoryController';
 import { OrderController } from './controllers/OrderController';
 import { ProductController } from './controllers/ProductController';
+import { UserController } from './controllers/UserController';
 import { WebhookController } from './controllers/WebhookController';
-import { createAdminMiddleware } from './middleware/adminMiddleware';
 import { errorMiddleware } from './middleware/errorMiddleware';
 import { Category } from './models/Category';
 import { Order } from './models/Order';
@@ -38,6 +38,7 @@ import { OrderService } from './services/OrderService';
 import { PaymentService } from './services/PaymentService';
 import { PostHogService } from './services/PostHogService';
 import { ProductService } from './services/ProductService';
+import { UserService } from './services/UserService';
 
 export function createApp(): Application {
   const app = express();
@@ -84,19 +85,18 @@ export function createApp(): Application {
   const orderService = new OrderService(orderRepository, productRepository, postHogService, paymentService);
   const categoryService = new CategoryService(categoryRepository);
   const aiService = new AIService();
+  const userService = new UserService(userRepository);
   const analyticsService = new AnalyticsService(analyticsRepository);
 
   // Dependency Injection - Controllers
   const authController = new AuthController(authService);
   const productController = new ProductController(productService);
-  const orderController = new OrderController(orderService, userRepository);
+  const orderController = new OrderController(orderService);
   const categoryController = new CategoryController(categoryService);
   const aiController = new AIController(aiService);
+  const userController = new UserController(userService);
   const analyticsController = new AnalyticsController(analyticsService);
   const webhookController = new WebhookController(paymentService, orderService);
-
-  // Admin middleware
-  const adminMiddleware = createAdminMiddleware(userRepository);
 
   // Stripe webhook route MUST be mounted BEFORE express.json() to get raw body
   app.use(
@@ -155,8 +155,8 @@ export function createApp(): Application {
       orderController,
       categoryController,
       aiController,
+      userController,
       analyticsController,
-      adminMiddleware,
     ),
   );
 

@@ -19,9 +19,10 @@ export interface Category {
 
 export interface User {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role: 'customer' | 'admin';
+  role: 'customer' | 'manager' | 'admin';
   createdAt?: string;
 }
 
@@ -49,6 +50,7 @@ export interface Order {
   paymentStatus?: PaymentStatus;
   shippingAddress?: ShippingAddress | null;
   items: OrderItem[];
+  user?: User;
   createdAt?: string;
 }
 
@@ -98,7 +100,8 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }

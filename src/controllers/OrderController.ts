@@ -1,14 +1,12 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 import { logger } from '../config/logger';
 import { OrderService } from '../services/OrderService';
-import { UserRepository } from '../repositories/UserRepository';
-import { AuthRequest, CreateOrderItem, OrderStatus, PaginationQuery, ShippingAddress, UserRole } from '../types';
+import { AuthRequest, CreateOrderItem, OrderStatus, PaginationQuery, ShippingAddress } from '../types';
 
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
-    private readonly userRepository: UserRepository,
   ) {}
 
   checkout = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -26,7 +24,7 @@ export class OrderController {
     }
   };
 
-  getAll = async (req: Request, res: Response): Promise<void> => {
+  getAll = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const pagination: PaginationQuery = {
         page: req.query.page ? Number(req.query.page) : undefined,
@@ -60,10 +58,9 @@ export class OrderController {
         return;
       }
 
-      // Ownership check: user must own the order or be admin
-      const user = await this.userRepository.findById(req.userId!);
-      if (order.userId !== req.userId && user?.role !== UserRole.ADMIN) {
-        res.status(403).json({ error: 'Access denied' });
+      // Ownership check: user must own the order or be manager/admin
+      if (order.userId !== req.userId && req.userRole !== 'admin' && req.userRole !== 'manager') {
+        res.status(403).json({ error: 'Not authorized to view this order' });
         return;
       }
 
@@ -84,10 +81,7 @@ export class OrderController {
     }
   };
 
-  updateStatus = async (
-    req: Request<{ id: string }, unknown, { status: string }>,
-    res: Response,
-  ): Promise<void> => {
+  updateStatus = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { status } = req.body;
       if (!Object.values(OrderStatus).includes(status as OrderStatus)) {

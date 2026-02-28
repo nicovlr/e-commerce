@@ -1,10 +1,10 @@
-import { Router, RequestHandler } from 'express';
+import { Router } from 'express';
 
 import { CategoryController } from '../controllers/CategoryController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
 import { validateId, validateCategory } from '../middleware/validationMiddleware';
 
-export const createCategoryRoutes = (controller: CategoryController, adminMiddleware: RequestHandler): Router => {
+export const createCategoryRoutes = (controller: CategoryController): Router => {
   const router = Router();
 
   /**
@@ -107,7 +107,7 @@ export const createCategoryRoutes = (controller: CategoryController, adminMiddle
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.post('/', authMiddleware, adminMiddleware, validateCategory, controller.create);
+  router.post('/', authMiddleware, requireStaff, validateCategory, controller.create);
 
   /**
    * @swagger
@@ -163,7 +163,7 @@ export const createCategoryRoutes = (controller: CategoryController, adminMiddle
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.put('/:id', authMiddleware, adminMiddleware, validateId, validateCategory, controller.update);
+  router.put('/:id', authMiddleware, requireStaff, validateId, validateCategory, controller.update);
 
   /**
    * @swagger
@@ -209,7 +209,7 @@ export const createCategoryRoutes = (controller: CategoryController, adminMiddle
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.delete('/:id', authMiddleware, adminMiddleware, validateId, controller.remove);
+  router.delete('/:id', authMiddleware, requireStaff, validateId, controller.remove);
 
   return router;
 };

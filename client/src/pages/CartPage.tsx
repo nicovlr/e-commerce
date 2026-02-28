@@ -23,8 +23,8 @@ const CartPage: React.FC = () => {
         <div className="empty-state">
           <h1>Your Cart is Empty</h1>
           <p>Looks like you haven't added any items yet.</p>
-          <Link to="/products" className="btn btn-primary">
-            Browse Products
+          <Link to="/products" className="btn btn-primary btn-lg">
+            Explore Products
           </Link>
         </div>
       </div>
@@ -108,7 +108,7 @@ const CartPage: React.FC = () => {
             >
               {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
             </button>
-            <button onClick={clearCart} className="btn btn-outline btn-block">
+            <button onClick={clearCart} className="clear-cart-btn">
               Clear Cart
             </button>
           </div>

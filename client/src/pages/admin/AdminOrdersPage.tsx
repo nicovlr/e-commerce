@@ -14,6 +14,8 @@ const AdminOrdersPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [expandedId, setExpandedId] = useState<number | null>(null);
   const { showToast } = useToast();
 
   const fetchOrders = useCallback(async () => {
@@ -42,6 +44,10 @@ const AdminOrdersPage: React.FC = () => {
     }
   };
 
+  const filtered = filterStatus === 'all'
+    ? orders
+    : orders.filter((o) => o.status === filterStatus);
+
   if (loading) return <div className="loading-container"><div className="spinner" /><p>Loading...</p></div>;
 
   return (
@@ -53,43 +59,98 @@ const AdminOrdersPage: React.FC = () => {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      <div className="admin-filter-bar">
+        <select
+          className="input admin-status-select"
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+        >
+          <option value="all">All statuses</option>
+          {ORDER_STATUSES.map((s) => (
+            <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+          ))}
+        </select>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+          {filtered.length} order{filtered.length !== 1 ? 's' : ''} shown
+        </span>
+      </div>
+
       <div className="admin-table-wrapper">
         <table className="admin-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Date</th>
+              <th>Client</th>
               <th>Items</th>
               <th>Total</th>
               <th>Status</th>
+              <th>Date</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {orders.map(order => (
-              <tr key={order.id}>
-                <td>#{order.id}</td>
-                <td>{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}</td>
-                <td>{order.items?.length || 0} item(s)</td>
-                <td>${Number(order.totalAmount).toFixed(2)}</td>
-                <td>
-                  <span className={`status-badge ${getStatusClass(order.status)}`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td>
-                  <select
-                    className="input admin-status-select"
-                    value={order.status}
-                    onChange={e => handleStatusChange(order.id, e.target.value)}
-                  >
-                    {ORDER_STATUSES.map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
+            {filtered.map((order) => (
+              <React.Fragment key={order.id}>
+                <tr
+                  className="admin-toggle-row"
+                  onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <td style={{ fontWeight: 500 }}>#{order.id}</td>
+                  <td>{order.user ? `${order.user.firstName} ${order.user.lastName}` : `User #${order.userId}`}</td>
+                  <td>{order.items?.length || 0} item(s)</td>
+                  <td>${Number(order.totalAmount).toFixed(2)}</td>
+                  <td>
+                    <span className={`status-badge ${getStatusClass(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td>{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}</td>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <select
+                      className="input admin-status-select"
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    >
+                      {ORDER_STATUSES.map((s) => (
+                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+                {expandedId === order.id && order.items && (
+                  <tr>
+                    <td colSpan={7} style={{ padding: 0 }}>
+                      <div className="admin-order-detail">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Product</th>
+                              <th>Qty</th>
+                              <th>Unit Price</th>
+                              <th>Subtotal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {order.items.map((item) => (
+                              <tr key={item.id}>
+                                <td>{item.product?.name || `Product #${item.productId}`}</td>
+                                <td>{item.quantity}</td>
+                                <td>${Number(item.unitPrice).toFixed(2)}</td>
+                                <td>${(Number(item.unitPrice) * item.quantity).toFixed(2)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No orders found.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

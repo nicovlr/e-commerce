@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Product } from '../types';
 import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
+import { getPlaceholderEmoji } from '../utils/categoryEmoji';
 import JsonLd from '../components/JsonLd';
 import MetaTags from '../components/MetaTags';
 import { getProductSchema, getBreadcrumbSchema } from '../utils/structuredData';
@@ -17,6 +18,7 @@ const ProductDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -61,7 +63,7 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
-  const imageUrl = product.imageUrl || 'https://via.placeholder.com/500x400?text=No+Image';
+  const hasImage = product.imageUrl && product.imageUrl.trim() !== '' && !imageError;
 
   return (
     <div className="product-detail-page">
@@ -79,20 +81,27 @@ const ProductDetailPage: React.FC = () => {
         { name: product.name, url: `https://shopsmart.com/products/${product.id}` }
       ])} />
       <div className="container">
-        <button onClick={() => navigate('/products')} className="btn btn-outline back-btn">
-          &larr; Back to Products
-        </button>
+        <nav className="breadcrumb">
+          <Link to="/">Home</Link>
+          <span className="breadcrumb-separator">/</span>
+          <Link to="/products">Products</Link>
+          <span className="breadcrumb-separator">/</span>
+          <span className="breadcrumb-current">{product.name}</span>
+        </nav>
 
         <div className="product-detail">
           <div className="product-detail-image">
-            <img
-              src={imageUrl}
-              alt={product.name}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  'https://via.placeholder.com/500x400?text=No+Image';
-              }}
-            />
+            {hasImage ? (
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <span className="product-detail-placeholder">
+                {getPlaceholderEmoji(product.category?.name)}
+              </span>
+            )}
           </div>
 
           <div className="product-detail-info">
@@ -124,14 +133,14 @@ const ProductDetailPage: React.FC = () => {
               <div className="add-to-cart-section">
                 <div className="quantity-selector">
                   <button
-                    className="btn btn-outline btn-sm"
+                    className="qty-btn"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   >
                     -
                   </button>
                   <span className="quantity-display">{quantity}</span>
                   <button
-                    className="btn btn-outline btn-sm"
+                    className="qty-btn"
                     onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                   >
                     +

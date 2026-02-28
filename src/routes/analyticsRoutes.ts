@@ -1,11 +1,10 @@
 import { Router } from 'express';
 
 import { AnalyticsController } from '../controllers/AnalyticsController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
 
 export const createAnalyticsRoutes = (
   controller: AnalyticsController,
-  adminMiddleware: ReturnType<typeof import('../middleware/adminMiddleware').createAdminMiddleware>,
 ): Router => {
   const router = Router();
 
@@ -67,7 +66,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/summary', authMiddleware, adminMiddleware, controller.getSummary);
+  router.get('/summary', authMiddleware, requireStaff, controller.getSummary);
 
   /**
    * @swagger
@@ -124,7 +123,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/revenue', authMiddleware, adminMiddleware, controller.getRevenue);
+  router.get('/revenue', authMiddleware, requireStaff, controller.getRevenue);
 
   /**
    * @swagger
@@ -180,7 +179,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/top-products', authMiddleware, adminMiddleware, controller.getTopProducts);
+  router.get('/top-products', authMiddleware, requireStaff, controller.getTopProducts);
 
   /**
    * @swagger
@@ -229,7 +228,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/orders', authMiddleware, adminMiddleware, controller.getOrders);
+  router.get('/orders', authMiddleware, requireStaff, controller.getOrders);
 
   /**
    * @swagger
@@ -283,7 +282,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/customers', authMiddleware, adminMiddleware, controller.getCustomers);
+  router.get('/customers', authMiddleware, requireStaff, controller.getCustomers);
 
   /**
    * @swagger
@@ -319,7 +318,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/stock', authMiddleware, adminMiddleware, controller.getStock);
+  router.get('/stock', authMiddleware, requireStaff, controller.getStock);
 
   return router;
 };

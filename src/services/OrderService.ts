@@ -1,6 +1,7 @@
 import { AppDataSource } from '../config/database';
 import { logger } from '../config/logger';
 import { Order } from '../models/Order';
+import { Product } from '../models/Product';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { ProductRepository } from '../repositories/ProductRepository';
 import {
@@ -42,7 +43,11 @@ export class OrderService {
       const orderItems = [];
 
       for (const item of items) {
-        const product = await this.productRepository.findById(item.productId);
+        const product = await manager.findOne(Product, {
+          where: { id: item.productId },
+          lock: { mode: 'pessimistic_write' },
+        });
+
         if (!product) {
           throw new Error(`Product with ID ${item.productId} not found`);
         }
@@ -56,35 +61,34 @@ export class OrderService {
           quantity: item.quantity,
           unitPrice: product.price,
         });
+
+        product.stock -= item.quantity;
+        await manager.save(product);
       }
 
-      const order = await this.orderRepository.create({
+      const order = manager.create(Order, {
         userId,
         totalAmount,
         status: OrderStatus.PENDING,
-        items: orderItems,
+        items: orderItems.map((oi) => ({
+          productId: oi.productId,
+          quantity: oi.quantity,
+          unitPrice: oi.unitPrice,
+        })),
         shippingAddress: shippingAddress || null,
         stripePaymentIntentId: stripePaymentIntentId || null,
         paymentStatus: PaymentStatus.UNPAID,
       });
 
-      // Atomic stock update within transaction
-      for (const item of items) {
-        await manager
-          .createQueryBuilder()
-          .update('products')
-          .set({ stock: () => `stock - ${item.quantity}` })
-          .where('id = :id AND stock >= :qty', { id: item.productId, qty: item.quantity })
-          .execute();
-      }
+      const savedOrder = await manager.save(order);
 
-      logger.info({ orderId: order.id, userId, itemCount: items.length }, 'Order created');
+      logger.info({ orderId: savedOrder.id, userId, itemCount: items.length }, 'Order created');
       this.postHogService?.capture(String(userId), 'order_created', {
-        orderId: order.id,
+        orderId: savedOrder.id,
         totalAmount: totalAmount,
         itemCount: items.length,
       });
-      return order;
+      return savedOrder;
     });
   }
 
