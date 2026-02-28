@@ -16,14 +16,17 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, alertsData] = await Promise.all([
-          productService.getAll(),
-          aiService.getAlerts(),
-        ]);
+        const productsData = await productService.getAll();
         setProducts(productsData);
+      } catch {
+        setError('Failed to load products.');
+      }
+
+      try {
+        const alertsData = await aiService.getAlerts();
         setAlerts(alertsData);
       } catch {
-        setError('Failed to load dashboard data.');
+        // AI service may be offline — alerts simply stay empty
       } finally {
         setLoadingAlerts(false);
       }
@@ -126,15 +129,15 @@ const DashboardPage: React.FC = () => {
 
           {prediction && (
             <div className="prediction-result">
-              <h3>Prediction for: {prediction.product_name}</h3>
+              <h3>Prediction for: {prediction.productName}</h3>
               <div className="prediction-grid">
                 <div className="prediction-card">
                   <span className="prediction-label">Current Stock</span>
-                  <span className="prediction-value">{prediction.current_stock}</span>
+                  <span className="prediction-value">{prediction.currentStock}</span>
                 </div>
                 <div className="prediction-card">
                   <span className="prediction-label">Predicted Demand</span>
-                  <span className="prediction-value">{prediction.predicted_demand}</span>
+                  <span className="prediction-value">{prediction.predictedDemand}</span>
                 </div>
                 <div className="prediction-card">
                   <span className="prediction-label">Confidence</span>
@@ -172,15 +175,15 @@ const DashboardPage: React.FC = () => {
               {alerts.map((alert) => (
                 <div key={alert.id} className={`alert-card ${getSeverityClass(alert.severity)}`}>
                   <div className="alert-card-header">
-                    <span className="alert-type-badge">{getAlertTypeLabel(alert.alert_type)}</span>
+                    <span className="alert-type-badge">{getAlertTypeLabel(alert.alertType)}</span>
                     <span className={`severity-badge ${getSeverityClass(alert.severity)}`}>
                       {alert.severity.toUpperCase()}
                     </span>
                   </div>
-                  <h3 className="alert-product-name">{alert.product_name}</h3>
+                  <h3 className="alert-product-name">{alert.productName}</h3>
                   <p className="alert-message">{alert.message}</p>
                   <div className="alert-details">
-                    <span>Current Stock: {alert.current_stock}</span>
+                    <span>Current Stock: {alert.currentStock}</span>
                     <span>Threshold: {alert.threshold}</span>
                   </div>
                 </div>
@@ -207,7 +210,7 @@ const DashboardPage: React.FC = () => {
                   {products.map((product) => (
                     <tr key={product.id}>
                       <td>{product.name}</td>
-                      <td>${product.price.toFixed(2)}</td>
+                      <td>${Number(product.price).toFixed(2)}</td>
                       <td>{product.stock}</td>
                       <td>
                         {product.stock === 0 && (

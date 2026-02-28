@@ -26,8 +26,8 @@ export const mockProduct = (overrides: Partial<Product> = {}): Product => ({
   description: 'A test product description',
   price: 29.99,
   stock: 50,
-  image_url: 'https://example.com/image.jpg',
-  category_id: 1,
+  imageUrl: 'https://example.com/image.jpg',
+  categoryId: 1,
   category: { id: 1, name: 'Electronics' },
   ...overrides,
 });

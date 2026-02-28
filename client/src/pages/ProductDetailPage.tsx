@@ -58,7 +58,7 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
-  const imageUrl = product.image_url || 'https://via.placeholder.com/500x400?text=No+Image';
+  const imageUrl = product.imageUrl || 'https://via.placeholder.com/500x400?text=No+Image';
 
   return (
     <div className="product-detail-page">
@@ -86,7 +86,7 @@ const ProductDetailPage: React.FC = () => {
               <span className="category-tag">{product.category.name}</span>
             )}
 
-            <p className="product-detail-price">${product.price.toFixed(2)}</p>
+            <p className="product-detail-price">${Number(product.price).toFixed(2)}</p>
 
             <div className="stock-info">
               {product.stock > 10 && (

@@ -3,8 +3,8 @@ import { Product, Category } from '../types';
 
 export const productService = {
   async getAll(): Promise<Product[]> {
-    const response = await api.get<Product[]>('/products');
-    return response.data;
+    const response = await api.get<{ data: Product[] }>('/products');
+    return response.data.data;
   },
 
   async getById(id: number): Promise<Product> {

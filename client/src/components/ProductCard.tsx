@@ -18,7 +18,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
     addItem(product);
   };
 
-  const imageUrl = product.image_url || PLACEHOLDER_IMAGE;
+  const imageUrl = product.imageUrl || PLACEHOLDER_IMAGE;
 
   return (
     <div className="product-card">
@@ -45,7 +45,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
             {product.description && product.description.length > 80 ? '...' : ''}
           </p>
           <div className="product-footer">
-            <span className="product-price">${product.price.toFixed(2)}</span>
+            <span className="product-price">${Number(product.price).toFixed(2)}</span>
             <button
               onClick={handleAddToCart}
               className="btn btn-primary btn-sm"

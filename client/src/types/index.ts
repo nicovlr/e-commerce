@@ -2,13 +2,13 @@ export interface Product {
   id: number;
   name: string;
   description: string;
-  price: number;
+  price: number | string;
   stock: number;
-  image_url: string;
-  category_id: number;
+  imageUrl: string;
+  categoryId: number;
   category?: Category;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Category {
@@ -22,24 +22,24 @@ export interface User {
   name: string;
   email: string;
   role: 'user' | 'admin';
-  created_at?: string;
+  createdAt?: string;
 }
 
 export interface Order {
   id: number;
-  user_id: number;
-  total_amount: number;
+  userId: number;
+  totalAmount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   items: OrderItem[];
-  created_at?: string;
+  createdAt?: string;
 }
 
 export interface OrderItem {
   id: number;
-  order_id: number;
-  product_id: number;
+  orderId: number;
+  productId: number;
   quantity: number;
-  price: number;
+  unitPrice: number;
   product?: Product;
 }
 
@@ -49,24 +49,24 @@ export interface CartItem {
 }
 
 export interface DemandPrediction {
-  product_id: number;
-  product_name: string;
-  current_stock: number;
-  predicted_demand: number;
+  productId: number;
+  productName: string;
+  currentStock: number;
+  predictedDemand: number;
   confidence: number;
   recommendation: string;
 }
 
 export interface StockAlert {
   id: number;
-  product_id: number;
-  product_name: string;
-  alert_type: 'low_stock' | 'overstock' | 'trending';
+  productId: number;
+  productName: string;
+  alertType: 'low_stock' | 'overstock' | 'trending';
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
-  current_stock: number;
+  currentStock: number;
   threshold: number;
-  created_at?: string;
+  createdAt?: string;
 }
 
 export interface AuthResponse {

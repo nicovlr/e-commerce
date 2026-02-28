@@ -12,9 +12,9 @@ const mockedProductService = productService as jest.Mocked<typeof productService
 
 describe('ProductsPage', () => {
   const products = [
-    mockProduct({ id: 1, name: 'Alpha Widget', price: 10, category_id: 1 }),
-    mockProduct({ id: 2, name: 'Beta Gadget', price: 50, category_id: 2 }),
-    mockProduct({ id: 3, name: 'Gamma Tool', price: 25, category_id: 1 }),
+    mockProduct({ id: 1, name: 'Alpha Widget', price: 10, categoryId: 1 }),
+    mockProduct({ id: 2, name: 'Beta Gadget', price: 50, categoryId: 2 }),
+    mockProduct({ id: 3, name: 'Gamma Tool', price: 25, categoryId: 1 }),
   ];
 
   const categories = [

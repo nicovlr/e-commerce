@@ -35,7 +35,7 @@ const ProductsPage: React.FC = () => {
 
   const filteredProducts = products
     .filter((p) => {
-      if (selectedCategory !== null && p.category_id !== selectedCategory) return false;
+      if (selectedCategory !== null && p.categoryId !== selectedCategory) return false;
       if (debouncedSearch) {
         const term = debouncedSearch.toLowerCase();
         return (
@@ -48,9 +48,9 @@ const ProductsPage: React.FC = () => {
     .sort((a, b) => {
       switch (sortBy) {
         case 'price-asc':
-          return a.price - b.price;
+          return Number(a.price) - Number(b.price);
         case 'price-desc':
-          return b.price - a.price;
+          return Number(b.price) - Number(a.price);
         case 'name':
         default:
           return a.name.localeCompare(b.name);

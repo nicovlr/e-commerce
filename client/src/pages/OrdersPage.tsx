@@ -71,9 +71,9 @@ const OrdersPage: React.FC = () => {
                 <div className="order-card-header">
                   <div>
                     <span className="order-id">Order #{order.id}</span>
-                    {order.created_at && (
+                    {order.createdAt && (
                       <span className="order-date">
-                        {new Date(order.created_at).toLocaleDateString('en-US', {
+                        {new Date(order.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
@@ -91,17 +91,17 @@ const OrdersPage: React.FC = () => {
                     {order.items.map((item) => (
                       <div key={item.id} className="order-item-row">
                         <span className="order-item-name">
-                          {item.product?.name || `Product #${item.product_id}`}
+                          {item.product?.name || `Product #${item.productId}`}
                         </span>
                         <span className="order-item-qty">x{item.quantity}</span>
-                        <span className="order-item-price">${item.price.toFixed(2)}</span>
+                        <span className="order-item-price">${Number(item.unitPrice).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
                 )}
 
                 <div className="order-card-footer">
-                  <span className="order-total">Total: ${order.total_amount.toFixed(2)}</span>
+                  <span className="order-total">Total: ${Number(order.totalAmount).toFixed(2)}</span>
                 </div>
               </div>
             ))}

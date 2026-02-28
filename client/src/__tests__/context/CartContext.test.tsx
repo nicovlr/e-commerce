@@ -10,8 +10,8 @@ const testProduct: Product = {
   description: 'A test product',
   price: 19.99,
   stock: 10,
-  image_url: '',
-  category_id: 1,
+  imageUrl: '',
+  categoryId: 1,
 };
 
 const testProduct2: Product = {
@@ -20,8 +20,8 @@ const testProduct2: Product = {
   description: 'Another product',
   price: 9.99,
   stock: 5,
-  image_url: '',
-  category_id: 1,
+  imageUrl: '',
+  categoryId: 1,
 };
 
 const CartTestConsumer: React.FC = () => {

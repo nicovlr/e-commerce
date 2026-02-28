@@ -24,15 +24,11 @@ const CartPage: React.FC = () => {
 
     try {
       const orderItems = items.map((item) => ({
-        product_id: item.product.id,
+        productId: item.product.id,
         quantity: item.quantity,
-        price: item.product.price,
       }));
 
-      await api.post('/orders', {
-        items: orderItems,
-        total_amount: total,
-      });
+      await api.post('/orders', { items: orderItems });
 
       clearCart();
       setOrderSuccess(true);
@@ -85,7 +81,7 @@ const CartPage: React.FC = () => {
             {items.map((item) => (
               <div key={item.product.id} className="cart-item">
                 <img
-                  src={item.product.image_url || 'https://via.placeholder.com/80x80?text=No+Image'}
+                  src={item.product.imageUrl || 'https://via.placeholder.com/80x80?text=No+Image'}
                   alt={item.product.name}
                   className="cart-item-image"
                   onError={(e) => {
@@ -97,7 +93,7 @@ const CartPage: React.FC = () => {
                   <Link to={`/products/${item.product.id}`} className="cart-item-name">
                     {item.product.name}
                   </Link>
-                  <p className="cart-item-price">${item.product.price.toFixed(2)} each</p>
+                  <p className="cart-item-price">${Number(item.product.price).toFixed(2)} each</p>
                 </div>
                 <div className="cart-item-quantity">
                   <button
@@ -115,7 +111,7 @@ const CartPage: React.FC = () => {
                   </button>
                 </div>
                 <div className="cart-item-total">
-                  ${(item.product.price * item.quantity).toFixed(2)}
+                  ${(Number(item.product.price) * item.quantity).toFixed(2)}
                 </div>
                 <button
                   className="btn btn-danger btn-sm"
