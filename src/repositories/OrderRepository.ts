@@ -23,4 +23,11 @@ export class OrderRepository extends BaseRepository<Order> {
       relations: ['items', 'items.product', 'user'],
     });
   }
+
+  async findAllWithItems(): Promise<Order[]> {
+    return this.repository.find({
+      relations: ['items', 'items.product', 'user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 }

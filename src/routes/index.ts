@@ -5,12 +5,14 @@ import { AuthController } from '../controllers/AuthController';
 import { CategoryController } from '../controllers/CategoryController';
 import { OrderController } from '../controllers/OrderController';
 import { ProductController } from '../controllers/ProductController';
+import { UserController } from '../controllers/UserController';
 
 import { createAIRoutes } from './aiRoutes';
 import { createAuthRoutes } from './authRoutes';
 import { createCategoryRoutes } from './categoryRoutes';
 import { createOrderRoutes } from './orderRoutes';
 import { createProductRoutes } from './productRoutes';
+import { createUserRoutes } from './userRoutes';
 
 export const createApiRoutes = (
   productController: ProductController,
@@ -18,6 +20,7 @@ export const createApiRoutes = (
   orderController: OrderController,
   categoryController: CategoryController,
   aiController: AIController,
+  userController: UserController,
 ): Router => {
   const router = Router();
 
@@ -26,6 +29,7 @@ export const createApiRoutes = (
   router.use('/orders', createOrderRoutes(orderController));
   router.use('/categories', createCategoryRoutes(categoryController));
   router.use('/ai', createAIRoutes(aiController));
+  router.use('/users', createUserRoutes(userController));
 
   return router;
 };

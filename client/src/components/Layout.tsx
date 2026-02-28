@@ -1,8 +1,12 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Navbar from './Navbar';
 
 const Layout: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
+  const isStaff = user?.role === 'manager' || user?.role === 'admin';
+
   return (
     <div className="app-layout">
       <Navbar />
@@ -30,7 +34,9 @@ const Layout: React.FC = () => {
             <div className="footer-col-title">Client Services</div>
             <ul className="footer-links">
               <li><Link to="/login">Sign In</Link></li>
-              <li><Link to="/dashboard">Dashboard</Link></li>
+              {isAuthenticated && isStaff && (
+                <li><Link to="/admin/dashboard">Dashboard</Link></li>
+              )}
             </ul>
           </div>
         </div>

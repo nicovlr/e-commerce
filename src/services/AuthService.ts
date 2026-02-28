@@ -4,19 +4,12 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { User } from '../models/User';
 import { UserRepository } from '../repositories/UserRepository';
+import { UserWithoutPassword, stripPassword } from '../utils/stripPassword';
 
 interface TokenPayload {
   userId: number;
   email: string;
-  role: string;
-}
-
-type UserWithoutPassword = Omit<User, 'password'>;
-
-function stripPassword(user: User): UserWithoutPassword {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...rest } = user;
-  return rest as UserWithoutPassword;
+  role: 'customer' | 'manager' | 'admin';
 }
 
 export class AuthService {

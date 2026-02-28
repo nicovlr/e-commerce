@@ -8,6 +8,7 @@ import { AuthController } from './controllers/AuthController';
 import { CategoryController } from './controllers/CategoryController';
 import { OrderController } from './controllers/OrderController';
 import { ProductController } from './controllers/ProductController';
+import { UserController } from './controllers/UserController';
 import { errorMiddleware } from './middleware/errorMiddleware';
 import { Category } from './models/Category';
 import { Order } from './models/Order';
@@ -23,6 +24,7 @@ import { AuthService } from './services/AuthService';
 import { CategoryService } from './services/CategoryService';
 import { OrderService } from './services/OrderService';
 import { ProductService } from './services/ProductService';
+import { UserService } from './services/UserService';
 
 export function createApp(): Application {
   const app = express();
@@ -52,6 +54,7 @@ export function createApp(): Application {
   const orderService = new OrderService(orderRepository);
   const categoryService = new CategoryService(categoryRepository);
   const aiService = new AIService();
+  const userService = new UserService(userRepository);
 
   // Dependency Injection - Controllers
   const authController = new AuthController(authService);
@@ -59,6 +62,7 @@ export function createApp(): Application {
   const orderController = new OrderController(orderService);
   const categoryController = new CategoryController(categoryService);
   const aiController = new AIController(aiService);
+  const userController = new UserController(userService);
 
   // Routes
   app.use(
@@ -69,6 +73,7 @@ export function createApp(): Application {
       orderController,
       categoryController,
       aiController,
+      userController,
     ),
   );
 

@@ -2,7 +2,7 @@ import { Request } from 'express';
 
 export interface AuthRequest extends Request {
   userId?: number;
-  userRole?: string;
+  userRole?: 'customer' | 'manager' | 'admin';
 }
 
 export interface PaginationQuery {

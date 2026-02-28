@@ -35,4 +35,18 @@ export const productService = {
     const response = await api.get<Category>(`/categories/${id}`);
     return response.data;
   },
+
+  async createCategory(category: Omit<Category, 'id'>): Promise<Category> {
+    const response = await api.post<Category>('/categories', category);
+    return response.data;
+  },
+
+  async updateCategory(id: number, category: Partial<Category>): Promise<Category> {
+    const response = await api.put<Category>(`/categories/${id}`, category);
+    return response.data;
+  },
+
+  async deleteCategory(id: number): Promise<void> {
+    await api.delete(`/categories/${id}`);
+  },
 };

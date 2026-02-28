@@ -65,6 +65,10 @@ export class OrderService {
     return this.orderRepository.findByUserId(userId);
   }
 
+  async getAllOrders(): Promise<Order[]> {
+    return this.orderRepository.findAllWithItems();
+  }
+
   async updateOrderStatus(orderId: number, status: string): Promise<Order | null> {
     return this.orderRepository.update(orderId, { status });
   }

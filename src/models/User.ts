@@ -26,8 +26,8 @@ export class User {
   @Column()
   lastName: string;
 
-  @Column({ default: 'customer' })
-  role: string;
+  @Column({ type: 'enum', enum: ['customer', 'manager', 'admin'], default: 'customer' })
+  role: 'customer' | 'manager' | 'admin';
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];

@@ -9,6 +9,8 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
+  const isStaff = user?.role === 'manager' || user?.role === 'admin';
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -36,9 +38,9 @@ const Navbar: React.FC = () => {
           <Link to="/products" className="nav-link">
             Products
           </Link>
-          {isAuthenticated && user?.role === 'admin' && (
-            <Link to="/dashboard" className="nav-link">
-              Dashboard
+          {isAuthenticated && isStaff && (
+            <Link to="/admin" className="nav-link">
+              Admin
             </Link>
           )}
         </div>

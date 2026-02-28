@@ -10,6 +10,13 @@ export class ProductRepository extends BaseRepository<Product> {
     super(repository);
   }
 
+  async findAll(): Promise<Product[]> {
+    return this.repository.find({
+      where: { isActive: true },
+      relations: ['category'],
+    });
+  }
+
   async findWithFilters(filters: ProductFilter): Promise<Product[]> {
     const queryBuilder = this.repository
       .createQueryBuilder('product')

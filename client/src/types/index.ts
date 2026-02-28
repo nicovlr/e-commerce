@@ -22,7 +22,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'customer' | 'admin';
+  role: 'customer' | 'manager' | 'admin';
   createdAt?: string;
 }
 
@@ -32,6 +32,7 @@ export interface Order {
   totalAmount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   items: OrderItem[];
+  user?: User;
   createdAt?: string;
 }
 

@@ -25,7 +25,10 @@ export class ProductService {
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    return this.productRepository.delete(id);
+    const product = await this.productRepository.findById(id);
+    if (!product) return false;
+    await this.productRepository.update(id, { isActive: false });
+    return true;
   }
 
   async getLowStockProducts(threshold: number = 10): Promise<Product[]> {

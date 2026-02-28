@@ -18,7 +18,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   try {
     const decoded = jwt.verify(token, config.jwt.secret) as {
       userId: number;
-      role: string;
+      role: 'customer' | 'manager' | 'admin';
     };
     req.userId = decoded.userId;
     req.userRole = decoded.role;
@@ -31,6 +31,14 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
   if (req.userRole !== 'admin') {
     res.status(403).json({ error: 'Admin access required' });
+    return;
+  }
+  next();
+};
+
+export const requireStaff = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (req.userRole !== 'manager' && req.userRole !== 'admin') {
+    res.status(403).json({ error: 'Staff access required' });
     return;
   }
   next();

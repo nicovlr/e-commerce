@@ -23,6 +23,15 @@ export class OrderController {
     }
   };
 
+  getAll = async (_req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const orders = await this.orderService.getAllOrders();
+      res.json(orders);
+    } catch {
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  };
+
   getById = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const order = await this.orderService.getOrderById(Number(req.params.id));
@@ -30,7 +39,7 @@ export class OrderController {
         res.status(404).json({ error: 'Order not found' });
         return;
       }
-      if (order.userId !== req.userId && req.userRole !== 'admin') {
+      if (order.userId !== req.userId && req.userRole !== 'admin' && req.userRole !== 'manager') {
         res.status(403).json({ error: 'Not authorized to view this order' });
         return;
       }
@@ -57,11 +66,6 @@ export class OrderController {
         res.status(400).json({
           error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
         });
-        return;
-      }
-
-      if (req.userRole !== 'admin') {
-        res.status(403).json({ error: 'Admin access required to update order status' });
         return;
       }
 
