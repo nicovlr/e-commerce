@@ -66,7 +66,7 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="products-page">
       <div className="container">
-        <h1>Products</h1>
+        <h1>Our Products</h1>
 
         {error && <div className="alert alert-error">{error}</div>}
 

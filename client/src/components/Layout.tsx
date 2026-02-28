@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const Layout: React.FC = () => {
@@ -10,8 +10,35 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
       <footer className="footer">
-        <div className="container">
-          <p>ShopSmart &copy; {new Date().getFullYear()} - AI-Powered E-Commerce Platform</p>
+        <div className="footer-inner">
+          <div className="footer-brand-col">
+            <div className="footer-brand">ShopSmart</div>
+            <p className="footer-tagline">
+              Curated collections of exceptional products, designed for those
+              who appreciate quality, elegance, and lasting craftsmanship.
+            </p>
+          </div>
+          <div>
+            <div className="footer-col-title">Explore</div>
+            <ul className="footer-links">
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/products">Collection</Link></li>
+              <li><Link to="/cart">Cart</Link></li>
+            </ul>
+          </div>
+          <div>
+            <div className="footer-col-title">Client Services</div>
+            <ul className="footer-links">
+              <li><Link to="/login">Sign In</Link></li>
+              <li><Link to="/dashboard">Dashboard</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span className="footer-text">
+            &copy; {new Date().getFullYear()} ShopSmart. All rights reserved.
+          </span>
+          <span className="footer-text">Crafted with precision.</span>
         </div>
       </footer>
     </div>

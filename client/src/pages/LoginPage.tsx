@@ -49,11 +49,11 @@ const LoginPage: React.FC = () => {
   return (
     <div className="login-page">
       <div className="login-container">
-        <h1>{isLogin ? 'Sign In' : 'Create Account'}</h1>
+        <h1>{isLogin ? 'Welcome Back' : 'Create Account'}</h1>
         <p className="login-subtitle">
           {isLogin
-            ? 'Welcome back! Please sign in to continue.'
-            : 'Create a new account to start shopping.'}
+            ? 'Sign in to access your account and continue shopping.'
+            : 'Join us and discover our premium collection.'}
         </p>
 
         {error && <div className="alert alert-error">{error}</div>}

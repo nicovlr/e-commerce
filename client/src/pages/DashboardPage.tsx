@@ -207,7 +207,7 @@ const DashboardPage: React.FC = () => {
                   {products.map((product) => (
                     <tr key={product.id}>
                       <td>{product.name}</td>
-                      <td>${product.price.toFixed(2)}</td>
+                      <td>${Number(product.price).toFixed(2)}</td>
                       <td>{product.stock}</td>
                       <td>
                         {product.stock === 0 && (

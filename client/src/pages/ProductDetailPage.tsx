@@ -1,8 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Product } from '../types';
 import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
+
+const categoryEmoji: Record<string, string> = {
+  electronics: '\u{1F4F1}',
+  clothing: '\u{1F45A}',
+  books: '\u{1F4DA}',
+  home: '\u{1F3E0}',
+  sports: '\u{26BD}',
+  food: '\u{1F34E}',
+  beauty: '\u{2728}',
+  toys: '\u{1F381}',
+};
+
+const getPlaceholderEmoji = (categoryName?: string): string => {
+  if (!categoryName) return '\u{1F6CD}';
+  const key = categoryName.toLowerCase();
+  for (const [k, v] of Object.entries(categoryEmoji)) {
+    if (key.includes(k)) return v;
+  }
+  return '\u{1F6CD}';
+};
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +34,7 @@ const ProductDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -58,25 +79,32 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
-  const imageUrl = product.image_url || 'https://via.placeholder.com/500x400?text=No+Image';
+  const hasImage = product.image_url && product.image_url.trim() !== '' && !imageError;
 
   return (
     <div className="product-detail-page">
       <div className="container">
-        <button onClick={() => navigate('/products')} className="btn btn-outline back-btn">
-          &larr; Back to Products
-        </button>
+        <nav className="breadcrumb">
+          <Link to="/">Home</Link>
+          <span className="breadcrumb-separator">/</span>
+          <Link to="/products">Products</Link>
+          <span className="breadcrumb-separator">/</span>
+          <span className="breadcrumb-current">{product.name}</span>
+        </nav>
 
         <div className="product-detail">
           <div className="product-detail-image">
-            <img
-              src={imageUrl}
-              alt={product.name}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  'https://via.placeholder.com/500x400?text=No+Image';
-              }}
-            />
+            {hasImage ? (
+              <img
+                src={product.image_url}
+                alt={product.name}
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <span className="product-detail-placeholder">
+                {getPlaceholderEmoji(product.category?.name)}
+              </span>
+            )}
           </div>
 
           <div className="product-detail-info">
@@ -86,7 +114,7 @@ const ProductDetailPage: React.FC = () => {
               <span className="category-tag">{product.category.name}</span>
             )}
 
-            <p className="product-detail-price">${product.price.toFixed(2)}</p>
+            <p className="product-detail-price">${Number(product.price).toFixed(2)}</p>
 
             <div className="stock-info">
               {product.stock > 10 && (
@@ -108,14 +136,14 @@ const ProductDetailPage: React.FC = () => {
               <div className="add-to-cart-section">
                 <div className="quantity-selector">
                   <button
-                    className="btn btn-outline btn-sm"
+                    className="qty-btn"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   >
                     -
                   </button>
                   <span className="quantity-display">{quantity}</span>
                   <button
-                    className="btn btn-outline btn-sm"
+                    className="qty-btn"
                     onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                   >
                     +
