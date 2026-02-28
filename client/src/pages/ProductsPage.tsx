@@ -32,12 +32,12 @@ const ProductsPage: React.FC = () => {
 
   const filteredProducts = products
     .filter((p) => {
-      if (selectedCategory !== null && p.category_id !== selectedCategory) return false;
+      if (selectedCategory !== null && p.categoryId !== selectedCategory) return false;
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
         return (
           p.name.toLowerCase().includes(term) ||
-          p.description.toLowerCase().includes(term)
+          (p.description ?? '').toLowerCase().includes(term)
         );
       }
       return true;

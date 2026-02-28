@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -22,12 +23,12 @@ const LoginPage: React.FC = () => {
       if (isLogin) {
         await login({ email, password });
       } else {
-        if (!name.trim()) {
-          setError('Name is required.');
+        if (!firstName.trim() || !lastName.trim()) {
+          setError('First name and last name are required.');
           setLoading(false);
           return;
         }
-        await register({ name, email, password });
+        await register({ firstName, lastName, email, password });
       }
       navigate('/');
     } catch (err: unknown) {
@@ -36,8 +37,8 @@ const LoginPage: React.FC = () => {
           ? err.message
           : 'An error occurred. Please try again.';
       if (typeof err === 'object' && err !== null && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || message);
+        const axiosErr = err as { response?: { data?: { error?: string } } };
+        setError(axiosErr.response?.data?.error || message);
       } else {
         setError(message);
       }
@@ -60,18 +61,32 @@ const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="login-form">
           {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="name">Full Name</label>
-              <input
-                id="name"
-                type="text"
-                className="input"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required={!isLogin}
-              />
-            </div>
+            <>
+              <div className="form-group">
+                <label htmlFor="firstName">First Name</label>
+                <input
+                  id="firstName"
+                  type="text"
+                  className="input"
+                  placeholder="Enter your first name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required={!isLogin}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="lastName">Last Name</label>
+                <input
+                  id="lastName"
+                  type="text"
+                  className="input"
+                  placeholder="Enter your last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required={!isLogin}
+                />
+              </div>
+            </>
           )}
 
           <div className="form-group">

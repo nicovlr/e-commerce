@@ -1,6 +1,7 @@
+import { AppDataSource } from '../config/database';
 import { Order } from '../models/Order';
+import { Product } from '../models/Product';
 import { OrderRepository } from '../repositories/OrderRepository';
-import { ProductRepository } from '../repositories/ProductRepository';
 
 interface CreateOrderItem {
   productId: number;
@@ -10,43 +11,50 @@ interface CreateOrderItem {
 export class OrderService {
   constructor(
     private readonly orderRepository: OrderRepository,
-    private readonly productRepository: ProductRepository,
   ) {}
 
   async createOrder(userId: number, items: CreateOrderItem[]): Promise<Order> {
-    let totalAmount = 0;
-    const orderItems = [];
+    return AppDataSource.transaction(async (manager) => {
+      let totalAmount = 0;
+      const orderItems = [];
 
-    for (const item of items) {
-      const product = await this.productRepository.findById(item.productId);
-      if (!product) {
-        throw new Error(`Product with ID ${item.productId} not found`);
-      }
-      if (product.stock < item.quantity) {
-        throw new Error(`Insufficient stock for product: ${product.name}`);
+      for (const item of items) {
+        const product = await manager.findOne(Product, {
+          where: { id: item.productId },
+          lock: { mode: 'pessimistic_write' },
+        });
+
+        if (!product) {
+          throw new Error(`Product with ID ${item.productId} not found`);
+        }
+        if (product.stock < item.quantity) {
+          throw new Error(`Insufficient stock for product: ${product.name}`);
+        }
+
+        totalAmount += Number(product.price) * item.quantity;
+        orderItems.push({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: product.price,
+        });
+
+        product.stock -= item.quantity;
+        await manager.save(product);
       }
 
-      totalAmount += Number(product.price) * item.quantity;
-      orderItems.push({
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: product.price,
+      const order = manager.create(Order, {
+        userId,
+        totalAmount,
+        status: 'pending',
+        items: orderItems.map((oi) => ({
+          productId: oi.productId,
+          quantity: oi.quantity,
+          unitPrice: oi.unitPrice,
+        })),
       });
-    }
 
-    const order = await this.orderRepository.create({
-      userId,
-      totalAmount,
-      status: 'pending',
-      items: orderItems,
+      return manager.save(order);
     });
-
-    // Update stock
-    for (const item of items) {
-      await this.productRepository.updateStock(item.productId, -item.quantity);
-    }
-
-    return order;
   }
 
   async getOrderById(orderId: number): Promise<Order | null> {

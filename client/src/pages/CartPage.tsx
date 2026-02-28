@@ -2,27 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { getPlaceholderEmoji } from '../utils/categoryEmoji';
 import api from '../services/api';
-
-const categoryEmoji: Record<string, string> = {
-  electronics: '\u{1F4F1}',
-  clothing: '\u{1F45A}',
-  books: '\u{1F4DA}',
-  home: '\u{1F3E0}',
-  sports: '\u{26BD}',
-  food: '\u{1F34E}',
-  beauty: '\u{2728}',
-  toys: '\u{1F381}',
-};
-
-const getPlaceholderEmoji = (categoryName?: string): string => {
-  if (!categoryName) return '\u{1F6CD}';
-  const key = categoryName.toLowerCase();
-  for (const [k, v] of Object.entries(categoryEmoji)) {
-    if (key.includes(k)) return v;
-  }
-  return '\u{1F6CD}';
-};
 
 const CartPage: React.FC = () => {
   const { items, total, updateQuantity, removeItem, clearCart } = useCart();
@@ -102,12 +83,12 @@ const CartPage: React.FC = () => {
         <div className="cart-layout">
           <div className="cart-items">
             {items.map((item) => {
-              const hasImage = item.product.image_url && item.product.image_url.trim() !== '';
+              const hasImage = item.product.imageUrl && item.product.imageUrl.trim() !== '';
               return (
                 <div key={item.product.id} className="cart-item">
                   {hasImage ? (
                     <img
-                      src={item.product.image_url}
+                      src={item.product.imageUrl}
                       alt={item.product.name}
                       className="cart-item-image"
                       onError={(e) => {

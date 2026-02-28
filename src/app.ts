@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
+import helmet from 'helmet';
 
 import { AppDataSource } from './config/database';
 import { AIController } from './controllers/AIController';
@@ -26,9 +27,13 @@ import { ProductService } from './services/ProductService';
 export function createApp(): Application {
   const app = express();
 
-  // Middleware
-  app.use(cors());
-  app.use(express.json());
+  // Security middleware
+  app.use(helmet());
+  app.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+    credentials: true,
+  }));
+  app.use(express.json({ limit: '1mb' }));
 
   // Health check
   app.get('/health', (_req: Request, res: Response) => {
@@ -44,7 +49,7 @@ export function createApp(): Application {
   // Dependency Injection - Services
   const authService = new AuthService(userRepository);
   const productService = new ProductService(productRepository);
-  const orderService = new OrderService(orderRepository, productRepository);
+  const orderService = new OrderService(orderRepository);
   const categoryService = new CategoryService(categoryRepository);
   const aiService = new AIService();
 

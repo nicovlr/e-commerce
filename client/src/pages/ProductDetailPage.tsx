@@ -3,26 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Product } from '../types';
 import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
-
-const categoryEmoji: Record<string, string> = {
-  electronics: '\u{1F4F1}',
-  clothing: '\u{1F45A}',
-  books: '\u{1F4DA}',
-  home: '\u{1F3E0}',
-  sports: '\u{26BD}',
-  food: '\u{1F34E}',
-  beauty: '\u{2728}',
-  toys: '\u{1F381}',
-};
-
-const getPlaceholderEmoji = (categoryName?: string): string => {
-  if (!categoryName) return '\u{1F6CD}';
-  const key = categoryName.toLowerCase();
-  for (const [k, v] of Object.entries(categoryEmoji)) {
-    if (key.includes(k)) return v;
-  }
-  return '\u{1F6CD}';
-};
+import { getPlaceholderEmoji } from '../utils/categoryEmoji';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -79,7 +60,7 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
-  const hasImage = product.image_url && product.image_url.trim() !== '' && !imageError;
+  const hasImage = product.imageUrl && product.imageUrl.trim() !== '' && !imageError;
 
   return (
     <div className="product-detail-page">
@@ -96,7 +77,7 @@ const ProductDetailPage: React.FC = () => {
           <div className="product-detail-image">
             {hasImage ? (
               <img
-                src={product.image_url}
+                src={product.imageUrl}
                 alt={product.name}
                 onError={() => setImageError(true)}
               />

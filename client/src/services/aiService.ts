@@ -4,7 +4,7 @@ import { DemandPrediction, StockAlert } from '../types';
 export const aiService = {
   async predict(productId: number): Promise<DemandPrediction> {
     const response = await api.post<DemandPrediction>('/ai/predict', {
-      product_id: productId,
+      productId,
     });
     return response.data;
   },

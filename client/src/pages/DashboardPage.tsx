@@ -56,27 +56,12 @@ const DashboardPage: React.FC = () => {
     switch (severity) {
       case 'critical':
         return 'severity-critical';
-      case 'high':
-        return 'severity-high';
-      case 'medium':
-        return 'severity-medium';
-      case 'low':
-        return 'severity-low';
+      case 'warning':
+        return 'severity-warning';
+      case 'info':
+        return 'severity-info';
       default:
         return '';
-    }
-  };
-
-  const getAlertTypeLabel = (type: string): string => {
-    switch (type) {
-      case 'low_stock':
-        return 'Low Stock';
-      case 'overstock':
-        return 'Overstock';
-      case 'trending':
-        return 'Trending';
-      default:
-        return type;
     }
   };
 
@@ -126,25 +111,24 @@ const DashboardPage: React.FC = () => {
 
           {prediction && (
             <div className="prediction-result">
-              <h3>Prediction for: {prediction.product_name}</h3>
+              <h3>Prediction for: {prediction.productName}</h3>
               <div className="prediction-grid">
                 <div className="prediction-card">
                   <span className="prediction-label">Current Stock</span>
-                  <span className="prediction-value">{prediction.current_stock}</span>
+                  <span className="prediction-value">{prediction.currentStock}</span>
                 </div>
                 <div className="prediction-card">
-                  <span className="prediction-label">Predicted Demand</span>
-                  <span className="prediction-value">{prediction.predicted_demand}</span>
+                  <span className="prediction-label">7-Day Demand</span>
+                  <span className="prediction-value">{prediction.predictedDemand7d}</span>
                 </div>
                 <div className="prediction-card">
-                  <span className="prediction-label">Confidence</span>
-                  <span className="prediction-value">
-                    {(prediction.confidence * 100).toFixed(1)}%
-                  </span>
+                  <span className="prediction-label">30-Day Demand</span>
+                  <span className="prediction-value">{prediction.predictedDemand30d}</span>
                 </div>
               </div>
               <div className="recommendation-box">
-                <strong>Recommendation:</strong> {prediction.recommendation}
+                <strong>Restock Recommended:</strong>{' '}
+                {prediction.restockRecommended ? 'Yes' : 'No'}
               </div>
             </div>
           )}
@@ -169,19 +153,18 @@ const DashboardPage: React.FC = () => {
 
           {!loadingAlerts && alerts.length > 0 && (
             <div className="alerts-list">
-              {alerts.map((alert) => (
-                <div key={alert.id} className={`alert-card ${getSeverityClass(alert.severity)}`}>
+              {alerts.map((alert, index) => (
+                <div key={index} className={`alert-card ${getSeverityClass(alert.severity)}`}>
                   <div className="alert-card-header">
-                    <span className="alert-type-badge">{getAlertTypeLabel(alert.alert_type)}</span>
                     <span className={`severity-badge ${getSeverityClass(alert.severity)}`}>
                       {alert.severity.toUpperCase()}
                     </span>
                   </div>
-                  <h3 className="alert-product-name">{alert.product_name}</h3>
-                  <p className="alert-message">{alert.message}</p>
+                  <h3 className="alert-product-name">{alert.productName}</h3>
                   <div className="alert-details">
-                    <span>Current Stock: {alert.current_stock}</span>
-                    <span>Threshold: {alert.threshold}</span>
+                    <span>Current Stock: {alert.currentStock}</span>
+                    <span>Predicted Demand: {alert.predictedDemand}</span>
+                    <span>Days Until Stockout: {alert.daysUntilStockout}</span>
                   </div>
                 </div>
               ))}

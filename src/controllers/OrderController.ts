@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 import { OrderService } from '../services/OrderService';
 import { AuthRequest } from '../types';
@@ -7,9 +7,7 @@ interface CreateOrderBody {
   items: Array<{ productId: number; quantity: number }>;
 }
 
-interface UpdateStatusBody {
-  status: string;
-}
+const VALID_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -25,11 +23,15 @@ export class OrderController {
     }
   };
 
-  getById = async (req: Request, res: Response): Promise<void> => {
+  getById = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const order = await this.orderService.getOrderById(Number(req.params.id));
       if (!order) {
         res.status(404).json({ error: 'Order not found' });
+        return;
+      }
+      if (order.userId !== req.userId && req.userRole !== 'admin') {
+        res.status(403).json({ error: 'Not authorized to view this order' });
         return;
       }
       res.json(order);
@@ -47,14 +49,25 @@ export class OrderController {
     }
   };
 
-  updateStatus = async (
-    req: Request<{ id: string }, unknown, UpdateStatusBody>,
-    res: Response,
-  ): Promise<void> => {
+  updateStatus = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const { status } = req.body;
+
+      if (!status || !VALID_STATUSES.includes(status)) {
+        res.status(400).json({
+          error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
+        });
+        return;
+      }
+
+      if (req.userRole !== 'admin') {
+        res.status(403).json({ error: 'Admin access required to update order status' });
+        return;
+      }
+
       const order = await this.orderService.updateOrderStatus(
         Number(req.params.id),
-        req.body.status,
+        status,
       );
       if (!order) {
         res.status(404).json({ error: 'Order not found' });

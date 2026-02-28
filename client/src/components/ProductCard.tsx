@@ -1,34 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
+import { getPlaceholderEmoji } from '../utils/categoryEmoji';
 
 interface ProductCardProps {
   product: Product;
 }
 
-const categoryEmoji: Record<string, string> = {
-  electronics: '\u{1F4F1}',
-  clothing: '\u{1F45A}',
-  books: '\u{1F4DA}',
-  home: '\u{1F3E0}',
-  sports: '\u{26BD}',
-  food: '\u{1F34E}',
-  beauty: '\u{2728}',
-  toys: '\u{1F381}',
-};
-
-const getPlaceholderEmoji = (categoryName?: string): string => {
-  if (!categoryName) return '\u{1F6CD}';
-  const key = categoryName.toLowerCase();
-  for (const [k, v] of Object.entries(categoryEmoji)) {
-    if (key.includes(k)) return v;
-  }
-  return '\u{1F6CD}';
-};
-
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
+  const [imgError, setImgError] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -36,7 +18,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     addItem(product);
   };
 
-  const hasImage = product.image_url && product.image_url.trim() !== '';
+  const hasImage = product.imageUrl && product.imageUrl.trim() !== '' && !imgError;
 
   return (
     <div className="product-card">
@@ -44,20 +26,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="product-image-wrapper">
           {hasImage ? (
             <img
-              src={product.image_url}
+              src={product.imageUrl}
               alt={product.name}
               className="product-image"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const wrapper = target.parentElement;
-                if (wrapper && !wrapper.querySelector('.product-placeholder')) {
-                  const placeholder = document.createElement('span');
-                  placeholder.className = 'product-placeholder';
-                  placeholder.textContent = getPlaceholderEmoji(product.category?.name);
-                  wrapper.appendChild(placeholder);
-                }
-              }}
+              onError={() => setImgError(true)}
             />
           ) : (
             <span className="product-placeholder">

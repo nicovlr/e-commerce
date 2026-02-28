@@ -4,11 +4,11 @@ export interface Product {
   description: string;
   price: number;
   stock: number;
-  image_url: string;
-  category_id: number;
+  imageUrl: string;
+  categoryId: number;
   category?: Category;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Category {
@@ -19,27 +19,28 @@ export interface Category {
 
 export interface User {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role: 'user' | 'admin';
-  created_at?: string;
+  role: 'customer' | 'admin';
+  createdAt?: string;
 }
 
 export interface Order {
   id: number;
-  user_id: number;
-  total_amount: number;
+  userId: number;
+  totalAmount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   items: OrderItem[];
-  created_at?: string;
+  createdAt?: string;
 }
 
 export interface OrderItem {
   id: number;
-  order_id: number;
-  product_id: number;
+  orderId: number;
+  productId: number;
   quantity: number;
-  price: number;
+  unitPrice: number;
   product?: Product;
 }
 
@@ -49,24 +50,22 @@ export interface CartItem {
 }
 
 export interface DemandPrediction {
-  product_id: number;
-  product_name: string;
-  current_stock: number;
-  predicted_demand: number;
-  confidence: number;
-  recommendation: string;
+  productId: number;
+  productName: string;
+  currentStock: number;
+  predictedDemand7d: number;
+  predictedDemand14d: number;
+  predictedDemand30d: number;
+  restockRecommended: boolean;
 }
 
 export interface StockAlert {
-  id: number;
-  product_id: number;
-  product_name: string;
-  alert_type: 'low_stock' | 'overstock' | 'trending';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  message: string;
-  current_stock: number;
-  threshold: number;
-  created_at?: string;
+  productId: number;
+  productName: string;
+  currentStock: number;
+  predictedDemand: number;
+  daysUntilStockout: number;
+  severity: 'critical' | 'warning' | 'info';
 }
 
 export interface AuthResponse {
@@ -80,7 +79,8 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }

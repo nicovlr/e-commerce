@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
         </div>
 
         <div className="navbar-actions">
-          <Link to="/cart" className="nav-icon-link">
+          <Link to="/cart" className="nav-icon-link" aria-label={`Shopping cart${itemCount > 0 ? `, ${itemCount} items` : ''}`}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
               <line x1="3" y1="6" x2="21" y2="6" />
@@ -55,7 +55,7 @@ const Navbar: React.FC = () => {
 
           {isAuthenticated ? (
             <div className="auth-section">
-              <span className="user-greeting">{user?.name?.split(' ')[0]}</span>
+              <span className="user-greeting">{user?.firstName}</span>
               <button onClick={handleLogout} className="btn btn-outline btn-sm">
                 Logout
               </button>
