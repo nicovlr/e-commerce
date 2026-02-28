@@ -117,3 +117,22 @@ jobs:
         run: npm run build
         env:
           CI: true
+
+  docker-build:
+    name: Docker - Build Images
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build, python-ai-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t e-commerce-backend .
+
+      - name: Build frontend image
+        run: docker build -t e-commerce-client ./client
+
+      - name: Build AI service image
+        run: docker build -t e-commerce-ai ./ai-service
+
+      - name: Verify Docker Compose config
+        run: docker compose config --quiet

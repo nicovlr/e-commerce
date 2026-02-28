@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "lint": "eslint 'src/**/*.ts' '__tests__/**/*.ts'",
+    "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*.ts' '__tests__/**/*.ts'",
     "format:check": "prettier --check 'src/**/*.ts' '__tests__/**/*.ts'",
     "test": "jest --forceExit --detectOpenHandles",

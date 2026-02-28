@@ -28,9 +28,14 @@ const Navbar: React.FC = () => {
             Products
           </Link>
           {isAuthenticated && (
-            <Link to="/dashboard" className="nav-link">
-              Dashboard
-            </Link>
+            <>
+              <Link to="/orders" className="nav-link">
+                Orders
+              </Link>
+              <Link to="/dashboard" className="nav-link">
+                Dashboard
+              </Link>
+            </>
           )}
         </div>
 

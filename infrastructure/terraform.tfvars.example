@@ -1,0 +1,11 @@
+aws_region    = "eu-west-1"
+environment   = "staging"
+project_name  = "e-commerce"
+
+db_instance_class     = "db.t3.micro"
+db_username           = "postgres"
+db_password           = "CHANGE_ME"
+jwt_secret            = "CHANGE_ME"
+
+backend_desired_count = 2
+client_desired_count  = 2

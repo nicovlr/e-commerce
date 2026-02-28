@@ -86,6 +86,8 @@ Full-stack e-commerce platform with AI-powered stock management, built as a Soft
 | AI Service | Python, FastAPI, scikit-learn (Random Forest) |
 | Testing | Jest, Supertest, pytest |
 | CI/CD | GitHub Actions |
+| DevOps | Docker, Docker Compose, Nginx |
+| Cloud (IaC) | AWS ECS/Fargate, Terraform |
 | Code Quality | ESLint, Prettier |
 
 ## Project Structure
@@ -124,8 +126,14 @@ Full-stack e-commerce platform with AI-powered stock management, built as a Soft
 │   │   ├── services/       # Service layer tests
 │   │   └── repositories/   # Repository tests
 │   └── integration/        # API route tests (supertest)
-├── .github/workflows/      # CI/CD pipeline
-├── .eslintrc.js            # ESLint configuration
+├── infrastructure/            # Terraform IaC (AWS ECS/Fargate)
+│   ├── main.tf                # VPC, ECS, RDS, ALB, ECR
+│   ├── variables.tf           # Input variables
+│   └── outputs.tf             # Stack outputs
+├── docker-compose.yml         # Multi-service orchestration
+├── Dockerfile                 # Backend container (multi-stage)
+├── .github/workflows/         # CI/CD pipeline
+├── .eslintrc.js               # ESLint configuration
 ├── .prettierrc             # Prettier configuration
 ├── tsconfig.json           # TypeScript configuration (strict)
 └── jest.config.ts          # Jest configuration
@@ -133,7 +141,21 @@ Full-stack e-commerce platform with AI-powered stock management, built as a Soft
 
 ## Setup
 
-### Prerequisites
+### Docker (Recommended)
+
+```bash
+# Start all services (backend, frontend, AI, PostgreSQL)
+docker compose up --build
+
+# Access the application
+# Frontend: http://localhost
+# Backend API: http://localhost:3000
+# AI Service: http://localhost:8000
+```
+
+### Manual Setup
+
+#### Prerequisites
 
 - Node.js 20+
 - Python 3.11+
@@ -262,6 +284,28 @@ GitHub Actions pipeline (`.github/workflows/ci.yml`):
 3. **Backend Build** - TypeScript compilation
 4. **AI Service Tests** - pytest
 5. **Frontend Build** - React production build
+6. **Docker Build** - Build and validate all container images
+
+## Cloud Deployment (AWS)
+
+Infrastructure as Code with Terraform in `infrastructure/`:
+
+- **VPC** - Multi-AZ networking with public/private subnets
+- **ECS Fargate** - Serverless container orchestration for all services
+- **RDS PostgreSQL** - Managed database with encryption and automated backups
+- **ECR** - Container registry with vulnerability scanning
+- **ALB** - Application Load Balancer with health checks
+- **CloudWatch** - Centralized logging
+
+```bash
+cd infrastructure
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+
+terraform init
+terraform plan
+terraform apply
+```
 
 ## License
 
