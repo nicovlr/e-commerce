@@ -15,6 +15,8 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - ecommerce-net
 
   backend:
     build:
@@ -26,34 +28,47 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_NAME: ecommerce
+      DB_POOL_MAX: 20
+      DB_IDLE_TIMEOUT: 30000
+      DB_CONNECTION_TIMEOUT: 5000
       PORT: 3000
       NODE_ENV: production
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
-      JWT_EXPIRES_IN: 24h
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: 12
       AI_SERVICE_URL: http://ai-service:8000
       CORS_ORIGINS: http://localhost,http://localhost:80
       POSTHOG_API_KEY: ${POSTHOG_API_KEY:-}
-      POSTHOG_HOST: http://posthog:8000
+      POSTHOG_HOST: ${POSTHOG_HOST:-http://posthog:8000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - ecommerce-net
 
   ai-service:
     build:
       context: ./ai-service
       dockerfile: Dockerfile
+    environment:
+      ALLOWED_ORIGINS: http://backend:3000
     ports:
       - "8000:8000"
     restart: unless-stopped
+    networks:
+      - ecommerce-net
 
   posthog-redis:
     image: redis:7-alpine
     restart: unless-stopped
     volumes:
       - posthog-redis-data:/data
+    networks:
+      - posthog-net
 
   posthog-postgres:
     image: postgres:16-alpine
@@ -69,6 +84,8 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - posthog-net
 
   posthog:
     image: posthog/posthog:latest
@@ -86,6 +103,9 @@ services:
       posthog-redis:
         condition: service_started
     restart: unless-stopped
+    networks:
+      - posthog-net
+      - ecommerce-net
 
   client:
     build:
@@ -96,8 +116,16 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - ecommerce-net
 
 volumes:
   pgdata:
   posthog-pgdata:
   posthog-redis-data:
+
+networks:
+  ecommerce-net:
+    driver: bridge
+  posthog-net:
+    driver: bridge

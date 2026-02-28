@@ -3,10 +3,12 @@ import express, { Application, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+import swaggerUi from 'swagger-ui-express';
 
 import { config } from './config';
 import { AppDataSource } from './config/database';
 import { logger } from './config/logger';
+import { swaggerSpec } from './config/swagger';
 import { AIController } from './controllers/AIController';
 import { AnalyticsController } from './controllers/AnalyticsController';
 import { AuthController } from './controllers/AuthController';
@@ -79,6 +81,13 @@ export function createApp(): Application {
         database: 'error',
       });
     }
+  });
+
+  // Swagger API documentation
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get('/api/docs.json', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
   });
 
   // Dependency Injection - Repositories

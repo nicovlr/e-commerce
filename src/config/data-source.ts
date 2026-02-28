@@ -11,7 +11,7 @@ import { InitialSchema1709000000000 } from '../migrations/1709000000000-InitialS
 
 dotenv.config();
 
-export const AppDataSource = new DataSource({
+const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432', 10),
@@ -23,9 +23,6 @@ export const AppDataSource = new DataSource({
   entities: [User, Product, Category, Order, OrderItem, SalesRecord],
   migrations: [InitialSchema1709000000000],
   subscribers: [],
-  extra: {
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  },
 });
+
+export default AppDataSource;

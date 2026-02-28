@@ -61,3 +61,31 @@ variable "client_desired_count" {
   type        = number
   default     = 2
 }
+
+# ──────────────────────────────────────────────
+# Auto-Scaling Capacity
+# ──────────────────────────────────────────────
+
+variable "backend_min_capacity" {
+  description = "Minimum number of backend ECS tasks for auto-scaling"
+  type        = number
+  default     = 2
+}
+
+variable "backend_max_capacity" {
+  description = "Maximum number of backend ECS tasks for auto-scaling"
+  type        = number
+  default     = 6
+}
+
+variable "client_min_capacity" {
+  description = "Minimum number of client ECS tasks for auto-scaling"
+  type        = number
+  default     = 2
+}
+
+variable "client_max_capacity" {
+  description = "Maximum number of client ECS tasks for auto-scaling"
+  type        = number
+  default     = 4
+}

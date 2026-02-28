@@ -2,12 +2,23 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (!process.env.JWT_SECRET && isProduction) {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+
 export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   jwt: {
-    secret: process.env.JWT_SECRET || 'default-secret-change-me',
-    expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    secret: process.env.JWT_SECRET || '',
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  },
+  db: {
+    poolMax: parseInt(process.env.DB_POOL_MAX || '20', 10),
+    idleTimeout: parseInt(process.env.DB_IDLE_TIMEOUT || '30000', 10),
+    connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '5000', 10),
   },
   aiService: {
     url: process.env.AI_SERVICE_URL || 'http://localhost:8000',
@@ -21,9 +32,10 @@ export const config = {
     windowMs: 15 * 60 * 1000,
     max: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
   },
-  bcryptRounds: 12,
+  bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   posthog: {
     apiKey: process.env.POSTHOG_API_KEY || '',
-    host: process.env.POSTHOG_HOST || 'http://localhost:8010',
+    host: process.env.POSTHOG_HOST || '',
   },
+  logLevel: process.env.LOG_LEVEL || 'info',
 };
