@@ -157,7 +157,8 @@ export class OrderService {
           await manager
             .createQueryBuilder()
             .update('products')
-            .set({ stock: () => `stock + ${item.quantity}` })
+            .set({ stock: () => 'stock + :qty' })
+            .setParameter('qty', item.quantity)
             .where('id = :id', { id: item.productId })
             .execute();
         }
@@ -200,7 +201,8 @@ export class OrderService {
               await manager
                 .createQueryBuilder()
                 .update('products')
-                .set({ stock: () => `stock + ${item.quantity}` })
+                .set({ stock: () => 'stock + :qty' })
+                .setParameter('qty', item.quantity)
                 .where('id = :id', { id: item.productId })
                 .execute();
             }
@@ -254,7 +256,8 @@ export class OrderService {
           await manager
             .createQueryBuilder()
             .update('products')
-            .set({ stock: () => `stock + ${item.quantity}` })
+            .set({ stock: () => 'stock + :qty' })
+            .setParameter('qty', item.quantity)
             .where('id = :id', { id: item.productId })
             .execute();
         }

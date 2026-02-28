@@ -83,7 +83,8 @@ export class ProductRepository extends BaseRepository<Product> {
     await this.repository
       .createQueryBuilder()
       .update(Product)
-      .set({ stock: () => `GREATEST(0, stock + ${quantity})` })
+      .set({ stock: () => 'GREATEST(0, stock + :qty)' })
+      .setParameter('qty', quantity)
       .where('id = :id', { id: productId })
       .execute();
 
