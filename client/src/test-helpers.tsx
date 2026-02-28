@@ -1,17 +1,20 @@
 import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { Product, Category } from './types';
 
 const AllProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>{children}</BrowserRouter>
-      </CartProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>{children}</BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 };
 

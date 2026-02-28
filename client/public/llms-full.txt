@@ -1,0 +1,248 @@
+# ShopSmart - Full Documentation
+
+> AI-powered e-commerce platform with intelligent inventory management and demand forecasting.
+
+ShopSmart is a full-stack e-commerce application that combines a modern online shopping experience with AI-driven analytics and inventory management. The platform enables customers to browse and purchase products across multiple categories, while providing business operators with demand predictions, stock alerts, and comprehensive business analytics. Built with React on the frontend, Node.js/Express on the backend, and Python/FastAPI for machine learning services.
+
+---
+
+## Features
+
+### Product Catalog
+Browse a full product catalog with support for searching by product name, filtering by category and price range, and sorting results. Each product page displays pricing, stock availability, a product image, and an add-to-cart action.
+
+### Shopping Cart
+Add products to a persistent shopping cart with full quantity management. Adjust item quantities, remove items, and view a running total before proceeding to checkout.
+
+### User Authentication
+Register and log in with email and password. Authentication is handled via JWT Bearer tokens. Authenticated users can place orders and view their order history.
+
+### Order Management
+Place orders through the checkout flow. Each order captures the items, quantities, total price, and shipping details. Users can view past orders and their statuses.
+
+### AI Demand Prediction
+Machine learning models (RandomForest via scikit-learn) analyze historical sales data to predict future demand for each product. Predictions include a confidence score indicating model certainty. These forecasts help operators make informed restocking decisions.
+
+### Stock Level Monitoring and Alerts
+Real-time tracking of inventory levels for every product. The system generates alerts when stock falls below defined thresholds, enabling proactive restocking before items go out of stock.
+
+### Business Analytics Dashboard
+A comprehensive analytics view providing:
+- **Revenue tracking**: Total revenue over time with trend visualization.
+- **Top products**: Ranking of best-selling products by units sold and revenue generated.
+- **Customer insights**: Metrics on customer activity, order frequency, and purchasing patterns.
+- **Stock performance**: Inventory turnover rates and stock health indicators.
+
+### Behavioral Analytics
+Integration with PostHog for tracking user behavior on the site, including page views, product interactions, cart actions, and conversion funnels.
+
+---
+
+## Pages
+
+| Page | URL | Description |
+|------|-----|-------------|
+| Home | `https://shopsmart.com/` | Landing page with featured products and main navigation |
+| Products | `https://shopsmart.com/products` | Full product catalog with search, category filters, price filters, and sorting |
+| Product Detail | `https://shopsmart.com/products/{id}` | Individual product page with image, description, pricing, stock info, and add to cart |
+| Cart | `https://shopsmart.com/cart` | Shopping cart showing all added items with quantity controls and checkout |
+| AI Dashboard | `https://shopsmart.com/dashboard` | AI-powered demand predictions and stock alerts for operators |
+| Analytics | `https://shopsmart.com/analytics` | Business analytics with revenue, orders, top products, and customer insights |
+
+---
+
+## API Endpoints
+
+Base URL: `/api`
+
+### Products
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products` | List all products. Supports query params: `category`, `search`, `minPrice`, `maxPrice`, `sort`, `page`, `limit` |
+| GET | `/api/products/:id` | Get a single product by ID |
+| POST | `/api/products` | Create a new product (admin) |
+| PUT | `/api/products/:id` | Update a product (admin) |
+| DELETE | `/api/products/:id` | Delete a product (admin) |
+
+### Categories
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/categories` | List all product categories |
+| GET | `/api/categories/:id` | Get a single category by ID |
+
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register a new user account. Body: `{ email, password, name }` |
+| POST | `/api/auth/login` | Log in and receive a JWT token. Body: `{ email, password }` |
+| GET | `/api/auth/me` | Get the currently authenticated user profile (requires Bearer token) |
+
+### Orders
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/orders` | List orders for the authenticated user |
+| GET | `/api/orders/:id` | Get a single order by ID |
+| POST | `/api/orders` | Create a new order. Body: `{ items: [{ productId, quantity }], shippingAddress }` |
+
+### Analytics
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/analytics/revenue` | Revenue data over time |
+| GET | `/api/analytics/top-products` | Top-selling products by units and revenue |
+| GET | `/api/analytics/customers` | Customer activity and purchasing insights |
+| GET | `/api/analytics/stock` | Stock performance and inventory health |
+
+### AI / Predictions
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/ai/predictions` | Get demand predictions for all products |
+| GET | `/api/ai/predictions/:productId` | Get demand prediction for a specific product |
+| GET | `/api/ai/stock-alerts` | Get current stock alerts for low-inventory products |
+
+---
+
+## Data Models
+
+### Product
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | integer | Unique product identifier |
+| name | string | Product name |
+| description | string | Product description |
+| price | decimal | Product price in USD |
+| stock | integer | Current stock quantity |
+| imageUrl | string | URL to the product image |
+| categoryId | integer | Foreign key to the product category |
+| category | object | The associated category (id, name) |
+
+### Order
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | integer | Unique order identifier |
+| userId | integer | The user who placed the order |
+| items | array | List of order items (productId, quantity, price) |
+| total | decimal | Total order amount |
+| shippingAddress | string | Delivery address |
+| status | string | Order status (pending, confirmed, shipped, delivered) |
+| createdAt | datetime | Timestamp when the order was placed |
+
+### User
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | integer | Unique user identifier |
+| email | string | User email address |
+| name | string | User display name |
+
+---
+
+## Order Flow
+
+1. **Browse**: Customer explores the product catalog, searches, and filters by category or price.
+2. **Add to Cart**: Customer adds desired products to the shopping cart with specified quantities.
+3. **Review Cart**: Customer reviews items in the cart, adjusts quantities, or removes items.
+4. **Checkout**: Customer provides shipping details and confirms the order.
+5. **Order Created**: The system creates the order, decrements stock levels, and returns an order confirmation.
+6. **Order Tracking**: Customer can view the order status in their order history.
+
+---
+
+## AI and Machine Learning
+
+### Demand Prediction
+- **Model**: RandomForest regressor trained on historical sales data.
+- **Service**: Python FastAPI microservice running scikit-learn models.
+- **Input**: Historical order volumes, seasonal patterns, and product metadata.
+- **Output**: Predicted demand quantity for a future period with a confidence score (0-1).
+- **Update frequency**: Models are retrained periodically as new sales data accumulates.
+
+### Stock Alerts
+- Automatically generated when a product's current stock falls below predicted demand.
+- Alert severity levels based on how far below the threshold stock has fallen.
+- Operators can view all active alerts on the AI Dashboard.
+
+### Confidence Scoring
+- Each prediction includes a confidence value between 0 and 1.
+- Higher confidence indicates the model has strong historical patterns to base the prediction on.
+- Lower confidence may indicate new products, irregular sales patterns, or insufficient data.
+
+---
+
+## Analytics Capabilities
+
+### Revenue Tracking
+- Total revenue aggregated over configurable time periods (daily, weekly, monthly).
+- Revenue trend visualization with period-over-period comparison.
+
+### Top Products
+- Ranked list of products by total units sold and total revenue generated.
+- Useful for identifying best sellers and underperformers.
+
+### Customer Insights
+- Active customer counts and new customer acquisition rates.
+- Average order value and order frequency metrics.
+- Purchasing pattern analysis.
+
+### Stock Performance
+- Inventory turnover rates per product and per category.
+- Stock health indicators showing overstocked and understocked items.
+- Correlation between stock levels and sales performance.
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, React Router, CSS Modules |
+| State Management | React Context / Hooks |
+| Backend API | Node.js, Express |
+| Database | PostgreSQL with TypeORM |
+| ML Service | Python, FastAPI, scikit-learn (RandomForest) |
+| Authentication | JWT Bearer tokens |
+| Behavioral Analytics | PostHog |
+| API Documentation | Swagger / OpenAPI |
+
+---
+
+## Product Categories
+
+- **Electronics**: Computers, phones, gadgets, and accessories
+- **Clothing**: Apparel, shoes, and fashion accessories
+- **Books**: Physical and digital books across all genres
+- **Home & Garden**: Furniture, decor, kitchen, and garden supplies
+- **Sports**: Sporting goods, fitness equipment, and outdoor gear
+
+---
+
+## Authentication
+
+All protected endpoints require a JWT Bearer token in the Authorization header:
+
+```
+Authorization: Bearer <token>
+```
+
+Tokens are obtained via the `/api/auth/login` endpoint and should be included in all subsequent requests to authenticated routes.
+
+---
+
+## Related Resources
+
+- [llms.txt](https://shopsmart.com/llms.txt): Concise site summary for LLMs
+- [API Docs](https://shopsmart.com/api/docs): Interactive Swagger/OpenAPI documentation
+- [Sitemap](https://shopsmart.com/sitemap.xml): XML sitemap for crawlers
+
+---
+
+## Contact
+
+ShopSmart is developed and maintained by the ShopSmart team. For questions about the platform or API, consult the API documentation at `/api/docs` or reach out through the site's contact channels.

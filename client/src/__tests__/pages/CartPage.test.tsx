@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '../../context/AuthContext';
 import { CartProvider } from '../../context/CartContext';
 import CartPage from '../../pages/CartPage';
@@ -16,13 +17,15 @@ const renderCartPage = () => {
   // Clear localStorage cart before each render
   localStorage.removeItem('cart');
   return render(
-    <AuthProvider>
-      <CartProvider>
-        <MemoryRouter>
-          <CartPage />
-        </MemoryRouter>
-      </CartProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <CartProvider>
+          <MemoryRouter>
+            <CartPage />
+          </MemoryRouter>
+        </CartProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 };
 
@@ -62,13 +65,15 @@ describe('CartPage', () => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
 
     render(
-      <AuthProvider>
-        <CartProvider>
-          <MemoryRouter>
-            <CartPage />
-          </MemoryRouter>
-        </CartProvider>
-      </AuthProvider>
+      <HelmetProvider>
+        <AuthProvider>
+          <CartProvider>
+            <MemoryRouter>
+              <CartPage />
+            </MemoryRouter>
+          </CartProvider>
+        </AuthProvider>
+      </HelmetProvider>
     );
 
     expect(screen.getByText('Shopping Cart')).toBeInTheDocument();
@@ -98,13 +103,15 @@ describe('CartPage', () => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
 
     render(
-      <AuthProvider>
-        <CartProvider>
-          <MemoryRouter>
-            <CartPage />
-          </MemoryRouter>
-        </CartProvider>
-      </AuthProvider>
+      <HelmetProvider>
+        <AuthProvider>
+          <CartProvider>
+            <MemoryRouter>
+              <CartPage />
+            </MemoryRouter>
+          </CartProvider>
+        </AuthProvider>
+      </HelmetProvider>
     );
 
     expect(screen.getByText('Items (3)')).toBeInTheDocument();
@@ -129,13 +136,15 @@ describe('CartPage', () => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
 
     render(
-      <AuthProvider>
-        <CartProvider>
-          <MemoryRouter>
-            <CartPage />
-          </MemoryRouter>
-        </CartProvider>
-      </AuthProvider>
+      <HelmetProvider>
+        <AuthProvider>
+          <CartProvider>
+            <MemoryRouter>
+              <CartPage />
+            </MemoryRouter>
+          </CartProvider>
+        </AuthProvider>
+      </HelmetProvider>
     );
 
     expect(screen.getByText('Login to Checkout')).toBeInTheDocument();
@@ -159,13 +168,15 @@ describe('CartPage', () => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
 
     render(
-      <AuthProvider>
-        <CartProvider>
-          <MemoryRouter>
-            <CartPage />
-          </MemoryRouter>
-        </CartProvider>
-      </AuthProvider>
+      <HelmetProvider>
+        <AuthProvider>
+          <CartProvider>
+            <MemoryRouter>
+              <CartPage />
+            </MemoryRouter>
+          </CartProvider>
+        </AuthProvider>
+      </HelmetProvider>
     );
 
     expect(screen.getByText('Clear Cart')).toBeInTheDocument();

@@ -27,6 +27,7 @@ import { OrderRepository } from './repositories/OrderRepository';
 import { ProductRepository } from './repositories/ProductRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { createApiRoutes } from './routes';
+import { createSitemapRoutes } from './routes/sitemapRoutes';
 import { AIService } from './services/AIService';
 import { AnalyticsService } from './services/AnalyticsService';
 import { AuthService } from './services/AuthService';
@@ -119,6 +120,9 @@ export function createApp(): Application {
 
   // Apply rate limiting to auth routes
   app.use('/api/auth', authLimiter);
+
+  // Sitemap route (before API routes so it's accessible at /sitemap.xml)
+  app.use(createSitemapRoutes(productRepository));
 
   // Routes
   app.use(

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '../../context/AuthContext';
 import { CartProvider } from '../../context/CartContext';
 import ProtectedRoute from '../../components/ProtectedRoute';
@@ -15,15 +16,17 @@ jest.mock('../../services/authService', () => ({
 describe('ProtectedRoute', () => {
   it('redirects to login when not authenticated', async () => {
     render(
-      <AuthProvider>
-        <CartProvider>
-          <MemoryRouter initialEntries={['/dashboard']}>
-            <ProtectedRoute>
-              <div>Protected Content</div>
-            </ProtectedRoute>
-          </MemoryRouter>
-        </CartProvider>
-      </AuthProvider>
+      <HelmetProvider>
+        <AuthProvider>
+          <CartProvider>
+            <MemoryRouter initialEntries={['/dashboard']}>
+              <ProtectedRoute>
+                <div>Protected Content</div>
+              </ProtectedRoute>
+            </MemoryRouter>
+          </CartProvider>
+        </AuthProvider>
+      </HelmetProvider>
     );
 
     // Should not render protected content when not authenticated

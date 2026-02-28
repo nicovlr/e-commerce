@@ -1,0 +1,42 @@
+# ShopSmart
+
+> AI-powered e-commerce platform with intelligent inventory management and demand forecasting.
+
+ShopSmart is a full-stack e-commerce platform that combines modern shopping with AI-driven analytics. Built with React, Node.js, and Python ML services.
+
+## Key Pages
+
+- [Home](https://shopsmart.com/): Featured products and main navigation
+- [Products](https://shopsmart.com/products): Full product catalog with search, category filters, and sorting
+- [Product Detail](https://shopsmart.com/products/{id}): Individual product pages with pricing, stock info, and add to cart
+- [Cart](https://shopsmart.com/cart): Shopping cart with checkout
+- [AI Dashboard](https://shopsmart.com/dashboard): AI-powered demand prediction and stock alerts
+- [Analytics](https://shopsmart.com/analytics): Business analytics with revenue, orders, and customer insights
+
+## API
+
+- Base URL: `/api`
+- Documentation: `/api/docs` (Swagger/OpenAPI)
+- Authentication: JWT Bearer tokens
+- Product API: `GET /api/products` - paginated product listing with filters
+- Categories: `GET /api/categories` - all product categories
+
+## Product Categories
+
+Electronics, Clothing, Books, Home & Garden, Sports
+
+## Features
+
+- Product search and filtering by category, price, name
+- Shopping cart with quantity management
+- User authentication and order management
+- AI demand prediction per product
+- Stock level monitoring with alerts
+- Business analytics dashboard (revenue, top products, customer insights)
+- PostHog behavioral analytics integration
+
+## Optional
+
+- [llms-full.txt](https://shopsmart.com/llms-full.txt): Detailed documentation
+- [API Docs](https://shopsmart.com/api/docs): Full API reference
+- [Sitemap](https://shopsmart.com/sitemap.xml): XML sitemap

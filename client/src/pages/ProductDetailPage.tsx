@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
+import JsonLd from '../components/JsonLd';
+import MetaTags from '../components/MetaTags';
+import { getProductSchema, getBreadcrumbSchema } from '../utils/structuredData';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -62,6 +65,19 @@ const ProductDetailPage: React.FC = () => {
 
   return (
     <div className="product-detail-page">
+      <MetaTags
+        title={`${product.name} | ShopSmart`}
+        description={product.description}
+        type="product"
+        image={product.imageUrl}
+        url={`https://shopsmart.com/products/${product.id}`}
+      />
+      <JsonLd data={getProductSchema(product)} />
+      <JsonLd data={getBreadcrumbSchema([
+        { name: 'Home', url: 'https://shopsmart.com/' },
+        { name: 'Products', url: 'https://shopsmart.com/products' },
+        { name: product.name, url: `https://shopsmart.com/products/${product.id}` }
+      ])} />
       <div className="container">
         <button onClick={() => navigate('/products')} className="btn btn-outline back-btn">
           &larr; Back to Products

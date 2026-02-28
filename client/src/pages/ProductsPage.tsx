@@ -3,6 +3,9 @@ import { Product, Category } from '../types';
 import { productService } from '../services/productService';
 import { useDebounce } from '../hooks/useDebounce';
 import ProductCard from '../components/ProductCard';
+import JsonLd from '../components/JsonLd';
+import MetaTags from '../components/MetaTags';
+import { getBreadcrumbSchema, getProductListSchema } from '../utils/structuredData';
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -68,6 +71,15 @@ const ProductsPage: React.FC = () => {
 
   return (
     <div className="products-page">
+      <MetaTags
+        title="Products | ShopSmart"
+        description="Browse our catalog of amazing products with intelligent search and filtering."
+      />
+      <JsonLd data={getBreadcrumbSchema([
+        { name: 'Home', url: 'https://shopsmart.com/' },
+        { name: 'Products', url: 'https://shopsmart.com/products' }
+      ])} />
+      <JsonLd data={getProductListSchema(filteredProducts)} />
       <div className="container">
         <h1>Products</h1>
 

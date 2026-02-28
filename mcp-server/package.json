@@ -1,0 +1,22 @@
+{
+  "name": "shopsmart-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for ShopSmart e-commerce product catalog",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "pg": "^8.13.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.18.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.7.0"
+  }
+}

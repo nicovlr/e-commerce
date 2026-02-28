@@ -15,6 +15,7 @@ import {
   Legend,
 } from 'recharts';
 import { analyticsService } from '../services/analyticsService';
+import MetaTags from '../components/MetaTags';
 import { AnalyticsSummary } from '../types';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -82,6 +83,7 @@ const AnalyticsDashboardPage: React.FC = () => {
 
   return (
     <div style={{ padding: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+      <MetaTags title="Analytics Dashboard | ShopSmart" />
       <h1 style={{ marginBottom: '0.5rem' }}>Analytics Dashboard</h1>
 
       {/* Filters */}
