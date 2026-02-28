@@ -9,6 +9,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 
+import { OrderStatus } from '../types';
+
 import { OrderItem } from './OrderItem';
 import { User } from './User';
 
@@ -24,8 +26,8 @@ export class Order {
   @Column()
   userId: number;
 
-  @Column({ default: 'pending' })
-  status: string;
+  @Column({ type: 'varchar', default: OrderStatus.PENDING })
+  status: OrderStatus;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalAmount: number;

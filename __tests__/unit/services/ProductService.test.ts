@@ -1,6 +1,7 @@
 import { ProductService } from '../../../src/services/ProductService';
 import { ProductRepository } from '../../../src/repositories/ProductRepository';
 import { Product } from '../../../src/models/Product';
+import { PaginatedResult } from '../../../src/types';
 
 // Mock ProductRepository
 const mockProductRepository = {
@@ -32,25 +33,30 @@ describe('ProductService', () => {
     isActive: true,
   };
 
+  const mockPaginatedResult: PaginatedResult<Product> = {
+    data: [mockProduct as Product],
+    meta: { page: 1, limit: 20, total: 1, totalPages: 1 },
+  };
+
   describe('getAllProducts', () => {
     it('should return all products when no filters are provided', async () => {
-      mockProductRepository.findAll.mockResolvedValue([mockProduct as Product]);
+      mockProductRepository.findWithFilters.mockResolvedValue(mockPaginatedResult);
 
       const result = await productService.getAllProducts();
 
-      expect(mockProductRepository.findAll).toHaveBeenCalledTimes(1);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('Test Product');
+      expect(mockProductRepository.findWithFilters).toHaveBeenCalledTimes(1);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].name).toBe('Test Product');
     });
 
     it('should apply filters when provided', async () => {
       const filters = { categoryId: 1, minPrice: 10 };
-      mockProductRepository.findWithFilters.mockResolvedValue([mockProduct as Product]);
+      mockProductRepository.findWithFilters.mockResolvedValue(mockPaginatedResult);
 
       const result = await productService.getAllProducts(filters);
 
-      expect(mockProductRepository.findWithFilters).toHaveBeenCalledWith(filters);
-      expect(result).toHaveLength(1);
+      expect(mockProductRepository.findWithFilters).toHaveBeenCalledWith(filters, undefined);
+      expect(result.data).toHaveLength(1);
     });
   });
 

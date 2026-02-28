@@ -1,11 +1,12 @@
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProductsPage from '../../pages/ProductsPage';
 import { renderWithProviders, mockProduct, mockCategory } from '../../test-helpers';
 import { productService } from '../../services/productService';
 
 jest.mock('../../services/productService');
+jest.useFakeTimers();
 
 const mockedProductService = productService as jest.Mocked<typeof productService>;
 
@@ -63,6 +64,9 @@ describe('ProductsPage', () => {
     const searchInput = screen.getByPlaceholderText('Search products...');
     fireEvent.change(searchInput, { target: { value: 'Beta' } });
 
+    // Advance past debounce delay
+    act(() => { jest.advanceTimersByTime(350); });
+
     expect(screen.getByText('Beta Gadget')).toBeInTheDocument();
     expect(screen.queryByText('Alpha Widget')).not.toBeInTheDocument();
     expect(screen.getByText('1 products found')).toBeInTheDocument();
@@ -77,6 +81,9 @@ describe('ProductsPage', () => {
 
     const searchInput = screen.getByPlaceholderText('Search products...');
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
+
+    // Advance past debounce delay
+    act(() => { jest.advanceTimersByTime(350); });
 
     expect(screen.getByText(/No products match your filters/)).toBeInTheDocument();
   });

@@ -1,38 +1,84 @@
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import pinoHttp from 'pino-http';
 
+import { config } from './config';
 import { AppDataSource } from './config/database';
+import { logger } from './config/logger';
 import { AIController } from './controllers/AIController';
+import { AnalyticsController } from './controllers/AnalyticsController';
 import { AuthController } from './controllers/AuthController';
 import { CategoryController } from './controllers/CategoryController';
 import { OrderController } from './controllers/OrderController';
 import { ProductController } from './controllers/ProductController';
+import { createAdminMiddleware } from './middleware/adminMiddleware';
 import { errorMiddleware } from './middleware/errorMiddleware';
 import { Category } from './models/Category';
 import { Order } from './models/Order';
 import { Product } from './models/Product';
 import { User } from './models/User';
+import { AnalyticsRepository } from './repositories/AnalyticsRepository';
 import { CategoryRepository } from './repositories/CategoryRepository';
 import { OrderRepository } from './repositories/OrderRepository';
 import { ProductRepository } from './repositories/ProductRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { createApiRoutes } from './routes';
 import { AIService } from './services/AIService';
+import { AnalyticsService } from './services/AnalyticsService';
 import { AuthService } from './services/AuthService';
 import { CategoryService } from './services/CategoryService';
 import { OrderService } from './services/OrderService';
+import { PostHogService } from './services/PostHogService';
 import { ProductService } from './services/ProductService';
 
 export function createApp(): Application {
   const app = express();
 
-  // Middleware
-  app.use(cors());
-  app.use(express.json());
+  // Security middleware
+  app.use(helmet());
+  app.use(
+    cors({
+      origin: config.cors.origins,
+      credentials: true,
+    }),
+  );
 
-  // Health check
-  app.get('/health', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  // Rate limiting on auth routes
+  const authLimiter = rateLimit({
+    windowMs: config.rateLimit.windowMs,
+    max: config.rateLimit.max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' },
+  });
+
+  app.use(express.json({ limit: '10kb' }));
+
+  // Structured HTTP logging
+  app.use(pinoHttp({ logger }));
+
+  // Health check with DB connectivity
+  app.get('/health', async (_req: Request, res: Response) => {
+    try {
+      const dbConnected = AppDataSource.isInitialized;
+      if (dbConnected) {
+        await AppDataSource.query('SELECT 1');
+      }
+      res.json({
+        status: dbConnected ? 'ok' : 'degraded',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: dbConnected ? 'connected' : 'disconnected',
+      });
+    } catch {
+      res.status(503).json({
+        status: 'degraded',
+        timestamp: new Date().toISOString(),
+        database: 'error',
+      });
+    }
   });
 
   // Dependency Injection - Repositories
@@ -40,13 +86,16 @@ export function createApp(): Application {
   const productRepository = new ProductRepository(AppDataSource.getRepository(Product));
   const orderRepository = new OrderRepository(AppDataSource.getRepository(Order));
   const categoryRepository = new CategoryRepository(AppDataSource.getRepository(Category));
+  const analyticsRepository = new AnalyticsRepository(AppDataSource);
 
   // Dependency Injection - Services
-  const authService = new AuthService(userRepository);
+  const postHogService = new PostHogService();
+  const authService = new AuthService(userRepository, postHogService);
   const productService = new ProductService(productRepository);
-  const orderService = new OrderService(orderRepository, productRepository);
+  const orderService = new OrderService(orderRepository, productRepository, postHogService);
   const categoryService = new CategoryService(categoryRepository);
   const aiService = new AIService();
+  const analyticsService = new AnalyticsService(analyticsRepository);
 
   // Dependency Injection - Controllers
   const authController = new AuthController(authService);
@@ -54,6 +103,13 @@ export function createApp(): Application {
   const orderController = new OrderController(orderService);
   const categoryController = new CategoryController(categoryService);
   const aiController = new AIController(aiService);
+  const analyticsController = new AnalyticsController(analyticsService);
+
+  // Admin middleware
+  const adminMiddleware = createAdminMiddleware(userRepository);
+
+  // Apply rate limiting to auth routes
+  app.use('/api/auth', authLimiter);
 
   // Routes
   app.use(
@@ -64,6 +120,8 @@ export function createApp(): Application {
       orderController,
       categoryController,
       aiController,
+      analyticsController,
+      adminMiddleware,
     ),
   );
 

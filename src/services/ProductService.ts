@@ -1,15 +1,15 @@
 import { Product } from '../models/Product';
 import { ProductRepository } from '../repositories/ProductRepository';
-import { ProductFilter } from '../types';
+import { PaginatedResult, PaginationQuery, ProductFilter } from '../types';
 
 export class ProductService {
   constructor(private readonly productRepository: ProductRepository) {}
 
-  async getAllProducts(filters?: ProductFilter): Promise<Product[]> {
-    if (filters && Object.keys(filters).length > 0) {
-      return this.productRepository.findWithFilters(filters);
-    }
-    return this.productRepository.findAll();
+  async getAllProducts(
+    filters?: ProductFilter,
+    pagination?: PaginationQuery,
+  ): Promise<PaginatedResult<Product>> {
+    return this.productRepository.findWithFilters(filters || {}, pagination);
   }
 
   async getProductById(id: number): Promise<Product | null> {

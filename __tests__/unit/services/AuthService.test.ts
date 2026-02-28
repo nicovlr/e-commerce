@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { AuthService } from '../../../src/services/AuthService';
 import { UserRepository } from '../../../src/repositories/UserRepository';
 import { User } from '../../../src/models/User';
+import { UserRole } from '../../../src/types';
 
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
@@ -29,7 +30,7 @@ describe('AuthService', () => {
     password: '$2a$12$hashedpassword',
     firstName: 'John',
     lastName: 'Doe',
-    role: 'customer',
+    role: UserRole.CUSTOMER,
   };
 
   describe('register', () => {

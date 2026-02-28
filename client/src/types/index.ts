@@ -84,3 +84,61 @@ export interface RegisterData {
   email: string;
   password: string;
 }
+
+// Analytics types
+export interface AnalyticsQuery {
+  startDate?: string;
+  endDate?: string;
+  granularity?: 'day' | 'week' | 'month';
+  limit?: number;
+}
+
+export interface RevenueDataPoint {
+  date: string;
+  revenue: number;
+  orderCount: number;
+}
+
+export interface TopProduct {
+  productId: number;
+  productName: string;
+  totalQuantity: number;
+  totalRevenue: number;
+}
+
+export interface OrderMetrics {
+  totalOrders: number;
+  averageOrderValue: number;
+  statusBreakdown: { status: string; count: number }[];
+}
+
+export interface CustomerInsights {
+  totalCustomers: number;
+  newCustomers: number;
+  returningCustomers: number;
+  topCustomers: {
+    userId: number;
+    email: string;
+    orderCount: number;
+    totalSpent: number;
+  }[];
+}
+
+export interface StockPerformance {
+  totalProducts: number;
+  lowStockProducts: {
+    productId: number;
+    productName: string;
+    currentStock: number;
+    categoryName: string;
+  }[];
+  turnoverRate: number;
+}
+
+export interface AnalyticsSummary {
+  revenue: RevenueDataPoint[];
+  topProducts: TopProduct[];
+  orderMetrics: OrderMetrics;
+  customerInsights: CustomerInsights;
+  stockPerformance: StockPerformance;
+}

@@ -74,17 +74,30 @@ describe('ProductRepository', () => {
   });
 
   describe('updateStock', () => {
-    it('should update product stock', async () => {
-      mockTypeOrmRepo.findOneBy.mockResolvedValue({ ...mockProduct, stock: 100 } as Product);
-      mockTypeOrmRepo.save.mockResolvedValue({ ...mockProduct, stock: 90 } as Product);
+    it('should update product stock atomically', async () => {
+      const mockQueryBuilder = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({ affected: 1 }),
+      };
+      mockTypeOrmRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      mockTypeOrmRepo.findOneBy.mockResolvedValue({ ...mockProduct, stock: 90 } as Product);
 
       const result = await productRepository.updateStock(1, -10);
 
       expect(result).toBeDefined();
-      expect(mockTypeOrmRepo.save).toHaveBeenCalled();
+      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalled();
     });
 
-    it('should return null for non-existent product', async () => {
+    it('should return the updated product after stock change', async () => {
+      const mockQueryBuilder = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({ affected: 0 }),
+      };
+      mockTypeOrmRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
       mockTypeOrmRepo.findOneBy.mockResolvedValue(null);
 
       const result = await productRepository.updateStock(999, -10);

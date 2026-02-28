@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { logger } from '../config/logger';
 import { Category } from '../models/Category';
 import { CategoryService } from '../services/CategoryService';
 
@@ -10,7 +11,8 @@ export class CategoryController {
     try {
       const categories = await this.categoryService.getAllCategories();
       res.json(categories);
-    } catch {
+    } catch (err) {
+      logger.error({ err }, 'Failed to fetch categories');
       res.status(500).json({ error: 'Failed to fetch categories' });
     }
   };
@@ -23,7 +25,8 @@ export class CategoryController {
         return;
       }
       res.json(category);
-    } catch {
+    } catch (err) {
+      logger.error({ err, categoryId: req.params.id }, 'Failed to fetch category');
       res.status(500).json({ error: 'Failed to fetch category' });
     }
   };
@@ -34,8 +37,10 @@ export class CategoryController {
   ): Promise<void> => {
     try {
       const category = await this.categoryService.createCategory(req.body);
+      logger.info({ categoryId: category.id }, 'Category created');
       res.status(201).json(category);
-    } catch {
+    } catch (err) {
+      logger.error({ err }, 'Failed to create category');
       res.status(500).json({ error: 'Failed to create category' });
     }
   };
@@ -50,8 +55,10 @@ export class CategoryController {
         res.status(404).json({ error: 'Category not found' });
         return;
       }
+      logger.info({ categoryId: req.params.id }, 'Category updated');
       res.json(category);
-    } catch {
+    } catch (err) {
+      logger.error({ err, categoryId: req.params.id }, 'Failed to update category');
       res.status(500).json({ error: 'Failed to update category' });
     }
   };
@@ -63,8 +70,10 @@ export class CategoryController {
         res.status(404).json({ error: 'Category not found' });
         return;
       }
+      logger.info({ categoryId: req.params.id }, 'Category deleted');
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error({ err, categoryId: req.params.id }, 'Failed to delete category');
       res.status(500).json({ error: 'Failed to delete category' });
     }
   };

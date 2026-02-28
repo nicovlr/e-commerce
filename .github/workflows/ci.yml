@@ -95,7 +95,7 @@ jobs:
         run: python -m pytest tests/ -v
 
   frontend-build:
-    name: Frontend - Build
+    name: Frontend - Build & Test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -112,6 +112,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run tests
+        run: npm test -- --watchAll=false --coverage
+        env:
+          CI: true
 
       - name: Build
         run: npm run build
@@ -136,3 +141,21 @@ jobs:
 
       - name: Verify Docker Compose config
         run: docker compose config --quiet
+
+  security-scan:
+    name: Security - Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Audit backend dependencies
+        run: npm audit --audit-level=high || true
+
+      - name: Audit frontend dependencies
+        run: cd client && npm audit --audit-level=high || true

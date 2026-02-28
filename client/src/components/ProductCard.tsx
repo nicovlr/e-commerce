@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/300x200?text=No+Image';
+const LOW_STOCK_THRESHOLD = 5;
+
 interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
   const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -15,7 +18,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     addItem(product);
   };
 
-  const imageUrl = product.image_url || 'https://via.placeholder.com/300x200?text=No+Image';
+  const imageUrl = product.image_url || PLACEHOLDER_IMAGE;
 
   return (
     <div className="product-card">
@@ -25,12 +28,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src={imageUrl}
             alt={product.name}
             className="product-image"
+            loading="lazy"
             onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                'https://via.placeholder.com/300x200?text=No+Image';
+              (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
             }}
           />
-          {product.stock <= 5 && product.stock > 0 && (
+          {product.stock <= LOW_STOCK_THRESHOLD && product.stock > 0 && (
             <span className="stock-badge low-stock">Low Stock</span>
           )}
           {product.stock === 0 && <span className="stock-badge out-of-stock">Out of Stock</span>}
@@ -55,6 +58,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </Link>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

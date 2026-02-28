@@ -45,6 +45,11 @@ variable "jwt_secret" {
   sensitive   = true
 }
 
+variable "certificate_arn" {
+  description = "ACM certificate ARN for HTTPS"
+  type        = string
+}
+
 variable "backend_desired_count" {
   description = "Number of backend ECS tasks"
   type        = number

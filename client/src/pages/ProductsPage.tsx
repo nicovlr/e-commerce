@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Product, Category } from '../types';
 import { productService } from '../services/productService';
+import { useDebounce } from '../hooks/useDebounce';
 import ProductCard from '../components/ProductCard';
 
 const ProductsPage: React.FC = () => {
@@ -30,11 +31,13 @@ const ProductsPage: React.FC = () => {
     fetchData();
   }, []);
 
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
   const filteredProducts = products
     .filter((p) => {
       if (selectedCategory !== null && p.category_id !== selectedCategory) return false;
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
+      if (debouncedSearch) {
+        const term = debouncedSearch.toLowerCase();
         return (
           p.name.toLowerCase().includes(term) ||
           p.description.toLowerCase().includes(term)
