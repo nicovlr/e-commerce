@@ -28,9 +28,8 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.dispatchEvent(new CustomEvent('auth:logout'));
     }
-    if (error.response?.status === 403) {
-      window.location.href = '/';
-    }
+    // 403 errors are handled by individual components (e.g. admin pages)
+    // Do NOT redirect globally — managers legitimately get 403 on admin-only endpoints
     return Promise.reject(error);
   }
 );
