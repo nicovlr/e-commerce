@@ -25,11 +25,29 @@ export interface User {
   createdAt?: string;
 }
 
+export type PaymentStatus = 'unpaid' | 'paid' | 'failed' | 'refunded';
+
+export interface ShippingAddress {
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface CheckoutResponse {
+  orderId: number;
+  clientSecret: string;
+}
+
 export interface Order {
   id: number;
   userId: number;
   totalAmount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  paymentStatus?: PaymentStatus;
+  shippingAddress?: ShippingAddress | null;
   items: OrderItem[];
   createdAt?: string;
 }

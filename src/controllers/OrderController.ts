@@ -3,13 +3,28 @@ import { Request, Response } from 'express';
 import { logger } from '../config/logger';
 import { OrderService } from '../services/OrderService';
 import { UserRepository } from '../repositories/UserRepository';
-import { AuthRequest, CreateOrderItem, OrderStatus, PaginationQuery, UserRole } from '../types';
+import { AuthRequest, CreateOrderItem, OrderStatus, PaginationQuery, ShippingAddress, UserRole } from '../types';
 
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     private readonly userRepository: UserRepository,
   ) {}
+
+  checkout = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { items, shippingAddress } = req.body as {
+        items: CreateOrderItem[];
+        shippingAddress: ShippingAddress;
+      };
+      const result = await this.orderService.checkout(req.userId!, items, shippingAddress);
+      res.status(201).json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Checkout failed';
+      logger.error({ err: error, userId: req.userId }, 'Checkout failed');
+      res.status(400).json({ error: message });
+    }
+  };
 
   getAll = async (req: Request, res: Response): Promise<void> => {
     try {

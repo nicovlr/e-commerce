@@ -50,6 +50,22 @@ export enum OrderStatus {
   CANCELLED = 'cancelled',
 }
 
+export enum PaymentStatus {
+  UNPAID = 'unpaid',
+  PAID = 'paid',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
+export interface ShippingAddress {
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
 export enum UserRole {
   CUSTOMER = 'customer',
   ADMIN = 'admin',

@@ -15,6 +15,7 @@ import { AuthController } from './controllers/AuthController';
 import { CategoryController } from './controllers/CategoryController';
 import { OrderController } from './controllers/OrderController';
 import { ProductController } from './controllers/ProductController';
+import { WebhookController } from './controllers/WebhookController';
 import { createAdminMiddleware } from './middleware/adminMiddleware';
 import { errorMiddleware } from './middleware/errorMiddleware';
 import { Category } from './models/Category';
@@ -28,11 +29,13 @@ import { ProductRepository } from './repositories/ProductRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { createApiRoutes } from './routes';
 import { createSitemapRoutes } from './routes/sitemapRoutes';
+import { createWebhookRoutes } from './routes/webhookRoutes';
 import { AIService } from './services/AIService';
 import { AnalyticsService } from './services/AnalyticsService';
 import { AuthService } from './services/AuthService';
 import { CategoryService } from './services/CategoryService';
 import { OrderService } from './services/OrderService';
+import { PaymentService } from './services/PaymentService';
 import { PostHogService } from './services/PostHogService';
 import { ProductService } from './services/ProductService';
 
@@ -65,6 +68,42 @@ export function createApp(): Application {
     legacyHeaders: false,
     message: { error: 'Too many requests, please try again later' },
   });
+
+  // Dependency Injection - Repositories
+  const userRepository = new UserRepository(AppDataSource.getRepository(User));
+  const productRepository = new ProductRepository(AppDataSource.getRepository(Product));
+  const orderRepository = new OrderRepository(AppDataSource.getRepository(Order));
+  const categoryRepository = new CategoryRepository(AppDataSource.getRepository(Category));
+  const analyticsRepository = new AnalyticsRepository(AppDataSource);
+
+  // Dependency Injection - Services
+  const postHogService = new PostHogService();
+  const paymentService = new PaymentService();
+  const authService = new AuthService(userRepository, postHogService);
+  const productService = new ProductService(productRepository);
+  const orderService = new OrderService(orderRepository, productRepository, postHogService, paymentService);
+  const categoryService = new CategoryService(categoryRepository);
+  const aiService = new AIService();
+  const analyticsService = new AnalyticsService(analyticsRepository);
+
+  // Dependency Injection - Controllers
+  const authController = new AuthController(authService);
+  const productController = new ProductController(productService);
+  const orderController = new OrderController(orderService, userRepository);
+  const categoryController = new CategoryController(categoryService);
+  const aiController = new AIController(aiService);
+  const analyticsController = new AnalyticsController(analyticsService);
+  const webhookController = new WebhookController(paymentService, orderService);
+
+  // Admin middleware
+  const adminMiddleware = createAdminMiddleware(userRepository);
+
+  // Stripe webhook route MUST be mounted BEFORE express.json() to get raw body
+  app.use(
+    '/api/webhooks',
+    express.raw({ type: 'application/json' }),
+    createWebhookRoutes(webhookController),
+  );
 
   app.use(express.json({ limit: '10kb' }));
 
@@ -100,33 +139,6 @@ export function createApp(): Application {
     res.send(swaggerSpec);
   });
 
-  // Dependency Injection - Repositories
-  const userRepository = new UserRepository(AppDataSource.getRepository(User));
-  const productRepository = new ProductRepository(AppDataSource.getRepository(Product));
-  const orderRepository = new OrderRepository(AppDataSource.getRepository(Order));
-  const categoryRepository = new CategoryRepository(AppDataSource.getRepository(Category));
-  const analyticsRepository = new AnalyticsRepository(AppDataSource);
-
-  // Dependency Injection - Services
-  const postHogService = new PostHogService();
-  const authService = new AuthService(userRepository, postHogService);
-  const productService = new ProductService(productRepository);
-  const orderService = new OrderService(orderRepository, productRepository, postHogService);
-  const categoryService = new CategoryService(categoryRepository);
-  const aiService = new AIService();
-  const analyticsService = new AnalyticsService(analyticsRepository);
-
-  // Dependency Injection - Controllers
-  const authController = new AuthController(authService);
-  const productController = new ProductController(productService);
-  const orderController = new OrderController(orderService, userRepository);
-  const categoryController = new CategoryController(categoryService);
-  const aiController = new AIController(aiService);
-  const analyticsController = new AnalyticsController(analyticsService);
-
-  // Admin middleware
-  const adminMiddleware = createAdminMiddleware(userRepository);
-
   // Apply rate limiting
   app.use('/api', globalLimiter);
   app.use('/api/auth', authLimiter);
@@ -147,6 +159,13 @@ export function createApp(): Application {
       adminMiddleware,
     ),
   );
+
+  // Payment timeout job — run every 5 minutes
+  setInterval(() => {
+    orderService.cancelExpiredOrders().catch((err) => {
+      logger.error({ err }, 'Payment timeout job failed');
+    });
+  }, 5 * 60 * 1000);
 
   // Error handling
   app.use(errorMiddleware);

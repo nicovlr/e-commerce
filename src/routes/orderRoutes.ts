@@ -2,7 +2,7 @@ import { Router, RequestHandler } from 'express';
 
 import { OrderController } from '../controllers/OrderController';
 import { authMiddleware } from '../middleware/authMiddleware';
-import { validateId, validateOrder, validatePagination } from '../middleware/validationMiddleware';
+import { validateCheckout, validateId, validateOrder, validatePagination } from '../middleware/validationMiddleware';
 
 export const createOrderRoutes = (controller: OrderController, adminMiddleware: RequestHandler): Router => {
   const router = Router();
@@ -43,6 +43,8 @@ export const createOrderRoutes = (controller: OrderController, adminMiddleware: 
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
+  router.post('/checkout', authMiddleware, validateCheckout, controller.checkout);
+
   router.get('/', authMiddleware, adminMiddleware, validatePagination, controller.getAll);
 
   /**

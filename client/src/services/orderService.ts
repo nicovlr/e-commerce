@@ -1,5 +1,5 @@
 import api from './api';
-import { Order } from '../types';
+import { CheckoutResponse, Order, ShippingAddress } from '../types';
 
 interface PaginatedOrdersResponse {
   data: Order[];
@@ -19,6 +19,17 @@ export const orderService = {
 
   async updateStatus(id: number, status: string): Promise<Order> {
     const response = await api.patch<Order>(`/orders/${id}/status`, { status });
+    return response.data;
+  },
+
+  async checkout(
+    items: { productId: number; quantity: number }[],
+    shippingAddress: ShippingAddress,
+  ): Promise<CheckoutResponse> {
+    const response = await api.post<CheckoutResponse>('/orders/checkout', {
+      items,
+      shippingAddress,
+    });
     return response.data;
   },
 };

@@ -39,6 +39,20 @@ export const validateOrder = [
   handleValidationErrors,
 ];
 
+export const validateCheckout = [
+  body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
+  body('items.*.productId').isInt({ min: 1 }).withMessage('Valid product ID is required'),
+  body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+  body('shippingAddress').isObject().withMessage('Shipping address is required'),
+  body('shippingAddress.firstName').notEmpty().withMessage('First name is required'),
+  body('shippingAddress.lastName').notEmpty().withMessage('Last name is required'),
+  body('shippingAddress.address').notEmpty().withMessage('Address is required'),
+  body('shippingAddress.city').notEmpty().withMessage('City is required'),
+  body('shippingAddress.postalCode').notEmpty().withMessage('Postal code is required'),
+  body('shippingAddress.country').notEmpty().withMessage('Country is required'),
+  handleValidationErrors,
+];
+
 export const validateCategory = [
   body('name').notEmpty().withMessage('Category name is required'),
   handleValidationErrors,

@@ -66,9 +66,16 @@ const OrdersPage: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <span className={`status-badge ${getStatusClass(order.status)}`}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                  </span>
+                  <div className="order-badges">
+                    <span className={`status-badge ${getStatusClass(order.status)}`}>
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </span>
+                    {order.paymentStatus && (
+                      <span className={`status-badge payment-badge payment-${order.paymentStatus}`}>
+                        {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {order.items && order.items.length > 0 && (

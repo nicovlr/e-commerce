@@ -1,60 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import MetaTags from '../components/MetaTags';
-import api from '../services/api';
 
 const CartPage: React.FC = () => {
   const { items, total, updateQuantity, removeItem, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [placing, setPlacing] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-
-    setPlacing(true);
-    setError(null);
-
-    try {
-      const orderItems = items.map((item) => ({
-        productId: item.product.id,
-        quantity: item.quantity,
-      }));
-
-      await api.post('/orders', { items: orderItems });
-
-      clearCart();
-      setOrderSuccess(true);
-    } catch {
-      setError('Failed to place order. Please try again.');
-    } finally {
-      setPlacing(false);
-    }
+    navigate('/checkout');
   };
-
-  if (orderSuccess) {
-    return (
-      <div className="container">
-        <div className="order-success">
-          <h1>Order Placed Successfully!</h1>
-          <p>Thank you for your purchase. Your order is being processed.</p>
-          <div className="order-success-actions">
-            <Link to="/products" className="btn btn-primary">
-              Continue Shopping
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (items.length === 0) {
     return (
@@ -75,8 +36,6 @@ const CartPage: React.FC = () => {
       <MetaTags title="Shopping Cart | ShopSmart" />
       <div className="container">
         <h1>Shopping Cart</h1>
-
-        {error && <div className="alert alert-error">{error}</div>}
 
         <div className="cart-layout">
           <div className="cart-items">
@@ -146,9 +105,8 @@ const CartPage: React.FC = () => {
             <button
               onClick={handleCheckout}
               className="btn btn-primary btn-lg btn-block"
-              disabled={placing}
             >
-              {placing ? 'Placing Order...' : isAuthenticated ? 'Place Order' : 'Login to Checkout'}
+              {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
             </button>
             <button onClick={clearCart} className="btn btn-outline btn-block">
               Clear Cart

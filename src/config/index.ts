@@ -35,5 +35,10 @@ export const config = {
     apiKey: process.env.POSTHOG_API_KEY || '',
     host: process.env.POSTHOG_HOST || '',
   },
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || '',
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+  },
   logLevel: process.env.LOG_LEVEL || 'info',
 };
