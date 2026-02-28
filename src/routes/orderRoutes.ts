@@ -1,11 +1,49 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 
 import { OrderController } from '../controllers/OrderController';
 import { authMiddleware } from '../middleware/authMiddleware';
-import { validateId, validateOrder } from '../middleware/validationMiddleware';
+import { validateId, validateOrder, validatePagination } from '../middleware/validationMiddleware';
 
-export const createOrderRoutes = (controller: OrderController): Router => {
+export const createOrderRoutes = (controller: OrderController, adminMiddleware: RequestHandler): Router => {
   const router = Router();
+
+  /**
+   * @swagger
+   * /orders:
+   *   get:
+   *     summary: Get all orders (admin only)
+   *     tags: [Orders]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: List of all orders
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Order'
+   *       401:
+   *         description: Unauthorized - missing or invalid token
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *       403:
+   *         description: Forbidden - admin access required
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   */
+  router.get('/', authMiddleware, adminMiddleware, validatePagination, controller.getAll);
 
   /**
    * @swagger
@@ -185,7 +223,7 @@ export const createOrderRoutes = (controller: OrderController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.patch('/:id/status', authMiddleware, validateId, controller.updateStatus);
+  router.patch('/:id/status', authMiddleware, adminMiddleware, validateId, controller.updateStatus);
 
   return router;
 };

@@ -1,10 +1,10 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 
 import { ProductController } from '../controllers/ProductController';
 import { authMiddleware } from '../middleware/authMiddleware';
-import { validateId, validateProduct } from '../middleware/validationMiddleware';
+import { validateId, validateProduct, validateProductQuery } from '../middleware/validationMiddleware';
 
-export const createProductRoutes = (controller: ProductController): Router => {
+export const createProductRoutes = (controller: ProductController, adminMiddleware: RequestHandler): Router => {
   const router = Router();
 
   /**
@@ -67,7 +67,7 @@ export const createProductRoutes = (controller: ProductController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/', controller.getAll);
+  router.get('/', validateProductQuery, controller.getAll);
 
   /**
    * @swagger
@@ -183,7 +183,7 @@ export const createProductRoutes = (controller: ProductController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.post('/', authMiddleware, validateProduct, controller.create);
+  router.post('/', authMiddleware, adminMiddleware, validateProduct, controller.create);
 
   /**
    * @swagger
@@ -239,7 +239,7 @@ export const createProductRoutes = (controller: ProductController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.put('/:id', authMiddleware, validateId, controller.update);
+  router.put('/:id', authMiddleware, adminMiddleware, validateId, validateProduct, controller.update);
 
   /**
    * @swagger
@@ -285,7 +285,7 @@ export const createProductRoutes = (controller: ProductController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.delete('/:id', authMiddleware, validateId, controller.remove);
+  router.delete('/:id', authMiddleware, adminMiddleware, validateId, controller.remove);
 
   return router;
 };

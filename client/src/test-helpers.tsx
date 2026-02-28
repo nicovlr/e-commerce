@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
 import { Product, Category } from './types';
 
 const AllProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -11,7 +12,9 @@ const AllProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     <HelmetProvider>
       <AuthProvider>
         <CartProvider>
-          <BrowserRouter>{children}</BrowserRouter>
+          <ToastProvider>
+            <BrowserRouter>{children}</BrowserRouter>
+          </ToastProvider>
         </CartProvider>
       </AuthProvider>
     </HelmetProvider>

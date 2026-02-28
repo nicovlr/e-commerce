@@ -154,8 +154,14 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Install backend dependencies
+        run: npm ci
+
       - name: Audit backend dependencies
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=critical
+
+      - name: Install frontend dependencies
+        run: cd client && npm ci
 
       - name: Audit frontend dependencies
-        run: cd client && npm audit --audit-level=high || true
+        run: cd client && npm audit --audit-level=critical

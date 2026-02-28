@@ -24,13 +24,13 @@ describe('ProductsPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedProductService.getAll.mockResolvedValue(products);
+    mockedProductService.getAll.mockResolvedValue({ data: products, meta: { page: 1, limit: 12, total: products.length, totalPages: 1 } });
     mockedProductService.getCategories.mockResolvedValue(categories);
   });
 
   it('shows loading state initially', () => {
-    mockedProductService.getAll.mockReturnValue(new Promise(() => {}));
-    mockedProductService.getCategories.mockReturnValue(new Promise(() => {}));
+    mockedProductService.getAll.mockReturnValue(new Promise(() => {}) as any);
+    mockedProductService.getCategories.mockReturnValue(new Promise(() => {}) as any);
     renderWithProviders(<ProductsPage />);
 
     expect(screen.getByText('Loading products...')).toBeInTheDocument();
@@ -54,22 +54,27 @@ describe('ProductsPage', () => {
     });
   });
 
-  it('filters products by search term', async () => {
+  it('sends search param to server on search', async () => {
     renderWithProviders(<ProductsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Alpha Widget')).toBeInTheDocument();
     });
 
+    const betaOnly = [mockProduct({ id: 2, name: 'Beta Gadget', price: 50, categoryId: 2 })];
+    mockedProductService.getAll.mockResolvedValue({ data: betaOnly, meta: { page: 1, limit: 12, total: 1, totalPages: 1 } });
+
     const searchInput = screen.getByPlaceholderText('Search products...');
     fireEvent.change(searchInput, { target: { value: 'Beta' } });
 
     // Advance past debounce delay
-    act(() => { jest.advanceTimersByTime(350); });
+    await act(async () => { jest.advanceTimersByTime(350); });
 
-    expect(screen.getByText('Beta Gadget')).toBeInTheDocument();
-    expect(screen.queryByText('Alpha Widget')).not.toBeInTheDocument();
-    expect(screen.getByText('1 products found')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockedProductService.getAll).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'Beta' })
+      );
+    });
   });
 
   it('shows empty state when no products match filters', async () => {
@@ -79,13 +84,16 @@ describe('ProductsPage', () => {
       expect(screen.getByText('Alpha Widget')).toBeInTheDocument();
     });
 
+    mockedProductService.getAll.mockResolvedValue({ data: [], meta: { page: 1, limit: 12, total: 0, totalPages: 0 } });
+
     const searchInput = screen.getByPlaceholderText('Search products...');
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
 
-    // Advance past debounce delay
-    act(() => { jest.advanceTimersByTime(350); });
+    await act(async () => { jest.advanceTimersByTime(350); });
 
-    expect(screen.getByText(/No products match your filters/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/No products match your filters/)).toBeInTheDocument();
+    });
   });
 
   it('shows error on fetch failure', async () => {
@@ -102,13 +110,11 @@ describe('ProductsPage', () => {
     renderWithProviders(<ProductsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('All Categories')).toBeInTheDocument();
+      const categoryOptions = screen.getAllByRole('option');
+      const categoryNames = categoryOptions.map((o) => o.textContent);
+      expect(categoryNames).toContain('Widgets');
+      expect(categoryNames).toContain('Gadgets');
     });
-
-    const categoryOptions = screen.getAllByRole('option');
-    const categoryNames = categoryOptions.map((o) => o.textContent);
-    expect(categoryNames).toContain('Widgets');
-    expect(categoryNames).toContain('Gadgets');
   });
 
   it('renders sort dropdown', async () => {

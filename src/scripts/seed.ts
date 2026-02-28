@@ -1,5 +1,8 @@
 import 'reflect-metadata';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import { AppDataSource } from '../config/database';
 import { Category } from '../models/Category';
@@ -15,14 +18,19 @@ const CATEGORIES = [
 ];
 
 const ADMIN_USER = {
-  email: 'admin@shopsmart.com',
-  password: 'Admin123!',
+  email: process.env.ADMIN_EMAIL || 'admin@shopsmart.com',
+  password: process.env.ADMIN_PASSWORD || '',
   firstName: 'Admin',
   lastName: 'User',
   role: UserRole.ADMIN,
 };
 
 async function seed(): Promise<void> {
+  if (!ADMIN_USER.password) {
+    console.error('ADMIN_PASSWORD environment variable is required for seeding.');
+    process.exit(1);
+  }
+
   try {
     await AppDataSource.initialize();
     console.log('Database connection established.');

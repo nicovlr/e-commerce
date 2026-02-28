@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Order } from '../types';
 import api from '../services/api';
+import { getStatusClass } from '../utils/orderStatus';
 
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -21,22 +22,6 @@ const OrdersPage: React.FC = () => {
     };
     fetchOrders();
   }, []);
-
-  const getStatusClass = (status: string): string => {
-    switch (status) {
-      case 'delivered':
-        return 'status-success';
-      case 'cancelled':
-        return 'status-danger';
-      case 'pending':
-      case 'processing':
-        return 'status-warning';
-      case 'shipped':
-        return 'status-info';
-      default:
-        return '';
-    }
-  };
 
   if (loading) {
     return (

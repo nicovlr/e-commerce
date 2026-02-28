@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { body, param, validationResult } from 'express-validator';
+import { body, param, query, validationResult } from 'express-validator';
 
 export const handleValidationErrors = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
@@ -39,7 +39,28 @@ export const validateOrder = [
   handleValidationErrors,
 ];
 
+export const validateCategory = [
+  body('name').notEmpty().withMessage('Category name is required'),
+  handleValidationErrors,
+];
+
 export const validateId = [
   param('id').isInt({ min: 1 }).withMessage('Valid ID is required'),
+  handleValidationErrors,
+];
+
+export const validatePagination = [
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
+  handleValidationErrors,
+];
+
+export const validateProductQuery = [
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
+  query('categoryId').optional().isInt({ min: 1 }).withMessage('Category ID must be a positive integer'),
+  query('minPrice').optional().isFloat({ min: 0 }).withMessage('minPrice must be a non-negative number'),
+  query('maxPrice').optional().isFloat({ min: 0 }).withMessage('maxPrice must be a non-negative number'),
+  query('search').optional().isString().trim().isLength({ max: 200 }).withMessage('Search term must be under 200 characters'),
   handleValidationErrors,
 ];

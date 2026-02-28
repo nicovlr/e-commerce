@@ -15,7 +15,7 @@ describe('HomePage', () => {
   });
 
   it('renders hero section', async () => {
-    mockedProductService.getAll.mockResolvedValue([]);
+    mockedProductService.getAll.mockResolvedValue({ data: [], meta: { page: 1, limit: 6, total: 0, totalPages: 0 } });
     renderWithProviders(<HomePage />);
 
     expect(screen.getByText('Welcome to ShopSmart')).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe('HomePage', () => {
   });
 
   it('shows loading spinner initially', () => {
-    mockedProductService.getAll.mockReturnValue(new Promise(() => {}));
+    mockedProductService.getAll.mockReturnValue(new Promise(() => {}) as any);
     renderWithProviders(<HomePage />);
 
     expect(screen.getByText('Loading products...')).toBeInTheDocument();
@@ -35,7 +35,7 @@ describe('HomePage', () => {
       mockProduct({ id: 1, name: 'Product A' }),
       mockProduct({ id: 2, name: 'Product B' }),
     ];
-    mockedProductService.getAll.mockResolvedValue(products);
+    mockedProductService.getAll.mockResolvedValue({ data: products, meta: { page: 1, limit: 6, total: 2, totalPages: 1 } });
 
     renderWithProviders(<HomePage />);
 
@@ -58,7 +58,7 @@ describe('HomePage', () => {
   });
 
   it('shows empty state when no products', async () => {
-    mockedProductService.getAll.mockResolvedValue([]);
+    mockedProductService.getAll.mockResolvedValue({ data: [], meta: { page: 1, limit: 6, total: 0, totalPages: 0 } });
 
     renderWithProviders(<HomePage />);
 
@@ -68,7 +68,7 @@ describe('HomePage', () => {
   });
 
   it('renders features section', async () => {
-    mockedProductService.getAll.mockResolvedValue([]);
+    mockedProductService.getAll.mockResolvedValue({ data: [], meta: { page: 1, limit: 6, total: 0, totalPages: 0 } });
     renderWithProviders(<HomePage />);
 
     expect(screen.getByText('Why ShopSmart?')).toBeInTheDocument();
@@ -81,7 +81,7 @@ describe('HomePage', () => {
     const products = Array.from({ length: 10 }, (_, i) =>
       mockProduct({ id: i + 1, name: `Product ${i + 1}` })
     );
-    mockedProductService.getAll.mockResolvedValue(products);
+    mockedProductService.getAll.mockResolvedValue({ data: products.slice(0, 6), meta: { page: 1, limit: 6, total: 10, totalPages: 2 } });
 
     renderWithProviders(<HomePage />);
 

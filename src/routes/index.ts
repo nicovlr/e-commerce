@@ -26,10 +26,10 @@ export const createApiRoutes = (
 ): Router => {
   const router = Router();
 
-  router.use('/products', createProductRoutes(productController));
+  router.use('/products', createProductRoutes(productController, adminMiddleware));
   router.use('/auth', createAuthRoutes(authController));
-  router.use('/orders', createOrderRoutes(orderController));
-  router.use('/categories', createCategoryRoutes(categoryController));
+  router.use('/orders', createOrderRoutes(orderController, adminMiddleware));
+  router.use('/categories', createCategoryRoutes(categoryController, adminMiddleware));
   router.use('/ai', createAIRoutes(aiController));
   router.use('/analytics', createAnalyticsRoutes(analyticsController, adminMiddleware));
 

@@ -86,6 +86,7 @@ const CartPage: React.FC = () => {
                   src={item.product.imageUrl || 'https://via.placeholder.com/80x80?text=No+Image'}
                   alt={item.product.name}
                   className="cart-item-image"
+                  loading="lazy"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src =
                       'https://via.placeholder.com/80x80?text=No+Image';
@@ -101,13 +102,15 @@ const CartPage: React.FC = () => {
                   <button
                     className="btn btn-outline btn-sm"
                     onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                    aria-label={`Decrease quantity of ${item.product.name}`}
                   >
                     -
                   </button>
-                  <span className="quantity-display">{item.quantity}</span>
+                  <span className="quantity-display" aria-label={`Quantity: ${item.quantity}`}>{item.quantity}</span>
                   <button
                     className="btn btn-outline btn-sm"
                     onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                    aria-label={`Increase quantity of ${item.product.name}`}
                   >
                     +
                   </button>

@@ -2,7 +2,7 @@ export interface Product {
   id: number;
   name: string;
   description: string;
-  price: number | string;
+  price: number;
   stock: number;
   imageUrl: string;
   categoryId: number;
@@ -21,7 +21,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'customer' | 'admin';
   createdAt?: string;
 }
 

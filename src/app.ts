@@ -48,10 +48,19 @@ export function createApp(): Application {
     }),
   );
 
-  // Rate limiting on auth routes
-  const authLimiter = rateLimit({
+  // Global rate limiting for all API routes
+  const globalLimiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
     max: config.rateLimit.max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' },
+  });
+
+  // Stricter rate limiting on auth routes
+  const authLimiter = rateLimit({
+    windowMs: config.rateLimit.windowMs,
+    max: Math.min(config.rateLimit.max, 20),
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests, please try again later' },
@@ -110,7 +119,7 @@ export function createApp(): Application {
   // Dependency Injection - Controllers
   const authController = new AuthController(authService);
   const productController = new ProductController(productService);
-  const orderController = new OrderController(orderService);
+  const orderController = new OrderController(orderService, userRepository);
   const categoryController = new CategoryController(categoryService);
   const aiController = new AIController(aiService);
   const analyticsController = new AnalyticsController(analyticsService);
@@ -118,7 +127,8 @@ export function createApp(): Application {
   // Admin middleware
   const adminMiddleware = createAdminMiddleware(userRepository);
 
-  // Apply rate limiting to auth routes
+  // Apply rate limiting
+  app.use('/api', globalLimiter);
   app.use('/api/auth', authLimiter);
 
   // Sitemap route (before API routes so it's accessible at /sitemap.xml)

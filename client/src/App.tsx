@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -17,6 +18,12 @@ const AnalyticsDashboardPage = lazy(() => import('./pages/AnalyticsDashboardPage
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
+// Admin pages
+const AdminLayout = lazy(() => import('./components/AdminLayout'));
+const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
+const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage'));
+const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'));
+
 const LoadingFallback: React.FC = () => (
   <div className="loading-container">
     <div className="spinner" />
@@ -29,6 +36,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <AuthProvider>
         <CartProvider>
+          <ToastProvider>
           <Router>
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
@@ -41,7 +49,7 @@ const App: React.FC = () => {
                   <Route
                     path="dashboard"
                     element={
-                      <ProtectedRoute>
+                      <ProtectedRoute requiredRole="admin">
                         <DashboardPage />
                       </ProtectedRoute>
                     }
@@ -49,7 +57,7 @@ const App: React.FC = () => {
                   <Route
                     path="analytics"
                     element={
-                      <ProtectedRoute>
+                      <ProtectedRoute requiredRole="admin">
                         <AnalyticsDashboardPage />
                       </ProtectedRoute>
                     }
@@ -62,11 +70,24 @@ const App: React.FC = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="admin"
+                    element={
+                      <ProtectedRoute requiredRole="admin">
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="products" element={<AdminProductsPage />} />
+                    <Route path="orders" element={<AdminOrdersPage />} />
+                    <Route path="categories" element={<AdminCategoriesPage />} />
+                  </Route>
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
               </Routes>
             </Suspense>
           </Router>
+          </ToastProvider>
         </CartProvider>
       </AuthProvider>
     </ErrorBoundary>

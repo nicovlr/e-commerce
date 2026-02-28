@@ -16,8 +16,8 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productsData = await productService.getAll();
-        setProducts(productsData);
+        const result = await productService.getAll();
+        setProducts(result.data);
       } catch {
         setError('Failed to load products.');
       }

@@ -15,8 +15,8 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const products = await productService.getAll();
-        setFeaturedProducts(products.slice(0, 6));
+        const result = await productService.getAll({ limit: 6 });
+        setFeaturedProducts(result.data);
       } catch {
         setError('Failed to load products. Please try again later.');
       } finally {
