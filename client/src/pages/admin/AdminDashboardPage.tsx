@@ -19,7 +19,7 @@ const AdminDashboardPage: React.FC = () => {
     const fetchData = async () => {
       try {
         const [productsRes, alertsData] = await Promise.all([
-          productService.getAll({ limit: 1000 }),
+          productService.getAll({ limit: 100 }),
           aiService.getAlerts().catch(() => [] as StockAlert[]),
         ]);
         setProducts(productsRes.data);

@@ -13,8 +13,8 @@ export const adminService = {
   },
 
   async getAllOrders(): Promise<Order[]> {
-    const response = await api.get<Order[]>('/orders');
-    return response.data;
+    const response = await api.get<{ data: Order[]; meta: { total: number } }>('/orders?limit=100');
+    return response.data.data;
   },
 
   async updateOrderStatus(orderId: number, status: string): Promise<Order> {
