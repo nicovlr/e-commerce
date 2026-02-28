@@ -1,4 +1,3 @@
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AdminOrdersPage from '../../../pages/admin/AdminOrdersPage';
@@ -14,7 +13,7 @@ const mockOrder = (overrides: Partial<Order> = {}): Order => ({
   userId: 1,
   status: 'pending',
   totalAmount: 99.99,
-  items: [{ id: 1, orderId: 1, productId: 1, quantity: 2, price: 49.99 }],
+  items: [{ id: 1, orderId: 1, productId: 1, quantity: 2, unitPrice: 49.99 }],
   createdAt: '2025-01-15T10:00:00Z',
   ...overrides,
 });

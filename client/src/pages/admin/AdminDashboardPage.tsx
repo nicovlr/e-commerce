@@ -18,11 +18,11 @@ const AdminDashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, alertsData] = await Promise.all([
-          productService.getAll(),
+        const [productsRes, alertsData] = await Promise.all([
+          productService.getAll({ limit: 1000 }),
           aiService.getAlerts().catch(() => [] as StockAlert[]),
         ]);
-        setProducts(productsData);
+        setProducts(productsRes.data);
         setAlerts(alertsData);
 
         let orderCount = 0;
@@ -39,7 +39,7 @@ const AdminDashboardPage: React.FC = () => {
         } catch { /* only admin can list users */ }
 
         setStats({
-          products: productsData.length,
+          products: productsRes.meta.total,
           orders: orderCount,
           revenue: totalRevenue,
           users: userCount,
@@ -164,17 +164,17 @@ const AdminDashboardPage: React.FC = () => {
                 <span className="prediction-value">{prediction.currentStock}</span>
               </div>
               <div className="prediction-card">
-                <span className="prediction-label">7-Day Demand</span>
-                <span className="prediction-value">{prediction.predictedDemand7d}</span>
+                <span className="prediction-label">Predicted Demand</span>
+                <span className="prediction-value">{prediction.predictedDemand}</span>
               </div>
               <div className="prediction-card">
-                <span className="prediction-label">30-Day Demand</span>
-                <span className="prediction-value">{prediction.predictedDemand30d}</span>
+                <span className="prediction-label">Confidence</span>
+                <span className="prediction-value">{(prediction.confidence * 100).toFixed(0)}%</span>
               </div>
             </div>
             <div className="recommendation-box">
-              <strong>Restock Recommended:</strong>{' '}
-              {prediction.restockRecommended ? 'Yes' : 'No'}
+              <strong>Recommendation:</strong>{' '}
+              {prediction.recommendation}
             </div>
           </div>
         )}
@@ -189,18 +189,18 @@ const AdminDashboardPage: React.FC = () => {
           </div>
         ) : (
           <div className="alerts-list">
-            {alerts.map((alert, index) => (
-              <div key={index} className={`alert-card ${getSeverityClass(alert.severity)}`}>
+            {alerts.map((alert) => (
+              <div key={alert.id} className={`alert-card ${getSeverityClass(alert.severity)}`}>
                 <div className="alert-card-header">
                   <span className={`severity-badge ${getSeverityClass(alert.severity)}`}>
                     {alert.severity.toUpperCase()}
                   </span>
                 </div>
                 <h3 className="alert-product-name">{alert.productName}</h3>
+                <p className="alert-message">{alert.message}</p>
                 <div className="alert-details">
                   <span>Stock: {alert.currentStock}</span>
-                  <span>Demand: {alert.predictedDemand}</span>
-                  <span>Stockout: {alert.daysUntilStockout}d</span>
+                  <span>Threshold: {alert.threshold}</span>
                 </div>
               </div>
             ))}

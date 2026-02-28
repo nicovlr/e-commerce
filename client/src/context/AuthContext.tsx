@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(response.user);
     posthog.identify(String(response.user.id), {
       email: response.user.email,
-      name: response.user.name,
+      name: `${response.user.firstName} ${response.user.lastName}`,
       role: response.user.role,
     });
   };
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(response.user);
     posthog.identify(String(response.user.id), {
       email: response.user.email,
-      name: response.user.name,
+      name: `${response.user.firstName} ${response.user.lastName}`,
       role: response.user.role,
     });
   };

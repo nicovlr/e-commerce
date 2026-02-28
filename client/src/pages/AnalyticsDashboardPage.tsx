@@ -136,11 +136,11 @@ const AnalyticsDashboardPage: React.FC = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
-              tickFormatter={(d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              tickFormatter={(d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             />
             <YAxis />
             <Tooltip
-              labelFormatter={(d) => new Date(d as string).toLocaleDateString()}
+              labelFormatter={(d: string) => new Date(d).toLocaleDateString()}
               formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
             />
             <Legend />
@@ -180,7 +180,7 @@ const AnalyticsDashboardPage: React.FC = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                label={({ status, count }) => `${status}: ${count}`}
+                label={({ status, count }: { status: string; count: number }) => `${status}: ${count}`}
               >
                 {orderMetrics.statusBreakdown.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
