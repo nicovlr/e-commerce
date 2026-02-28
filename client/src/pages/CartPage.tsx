@@ -1,63 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { getPlaceholderEmoji } from '../utils/categoryEmoji';
-import api from '../services/api';
+import MetaTags from '../components/MetaTags';
 
 const CartPage: React.FC = () => {
   const { items, total, updateQuantity, removeItem, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [placing, setPlacing] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-
-    setPlacing(true);
-    setError(null);
-
-    try {
-      const orderItems = items.map((item) => ({
-        productId: item.product.id,
-        quantity: item.quantity,
-      }));
-
-      await api.post('/orders', {
-        items: orderItems,
-      });
-
-      clearCart();
-      setOrderSuccess(true);
-    } catch {
-      setError('Failed to place order. Please try again.');
-    } finally {
-      setPlacing(false);
-    }
+    navigate('/checkout');
   };
-
-  if (orderSuccess) {
-    return (
-      <div className="container">
-        <div className="order-success">
-          <div className="order-success-icon">&#x2713;</div>
-          <h1>Order Placed Successfully!</h1>
-          <p>Thank you for your purchase. Your order is being processed.</p>
-          <div className="order-success-actions">
-            <Link to="/products" className="btn btn-primary btn-lg">
-              Continue Shopping
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (items.length === 0) {
     return (
@@ -75,67 +33,58 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="cart-page">
+      <MetaTags title="Shopping Cart | ShopSmart" />
       <div className="container">
         <h1>Shopping Cart</h1>
 
-        {error && <div className="alert alert-error">{error}</div>}
-
         <div className="cart-layout">
           <div className="cart-items">
-            {items.map((item) => {
-              const hasImage = item.product.imageUrl && item.product.imageUrl.trim() !== '';
-              return (
-                <div key={item.product.id} className="cart-item">
-                  {hasImage ? (
-                    <img
-                      src={item.product.imageUrl}
-                      alt={item.product.name}
-                      className="cart-item-image"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="cart-item-image-wrapper">
-                      <span className="cart-item-placeholder">
-                        {getPlaceholderEmoji(item.product.category?.name)}
-                      </span>
-                    </div>
-                  )}
-                  <div className="cart-item-info">
-                    <Link to={`/products/${item.product.id}`} className="cart-item-name">
-                      {item.product.name}
-                    </Link>
-                    <p className="cart-item-price">${Number(item.product.price).toFixed(2)} each</p>
-                  </div>
-                  <div className="cart-item-quantity">
-                    <button
-                      className="qty-btn"
-                      onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                    >
-                      -
-                    </button>
-                    <span className="quantity-display">{item.quantity}</span>
-                    <button
-                      className="qty-btn"
-                      onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div className="cart-item-total">
-                    ${(Number(item.product.price) * item.quantity).toFixed(2)}
-                  </div>
+            {items.map((item) => (
+              <div key={item.product.id} className="cart-item">
+                <img
+                  src={item.product.imageUrl || 'https://via.placeholder.com/80x80?text=No+Image'}
+                  alt={item.product.name}
+                  className="cart-item-image"
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      'https://via.placeholder.com/80x80?text=No+Image';
+                  }}
+                />
+                <div className="cart-item-info">
+                  <Link to={`/products/${item.product.id}`} className="cart-item-name">
+                    {item.product.name}
+                  </Link>
+                  <p className="cart-item-price">${Number(item.product.price).toFixed(2)} each</p>
+                </div>
+                <div className="cart-item-quantity">
                   <button
-                    className="btn-ghost"
-                    onClick={() => removeItem(item.product.id)}
-                    title="Remove item"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                    aria-label={`Decrease quantity of ${item.product.name}`}
                   >
-                    &#x2715;
+                    -
+                  </button>
+                  <span className="quantity-display" aria-label={`Quantity: ${item.quantity}`}>{item.quantity}</span>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                    aria-label={`Increase quantity of ${item.product.name}`}
+                  >
+                    +
                   </button>
                 </div>
-              );
-            })}
+                <div className="cart-item-total">
+                  ${(Number(item.product.price) * item.quantity).toFixed(2)}
+                </div>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => removeItem(item.product.id)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
           </div>
 
           <div className="cart-summary">
@@ -156,9 +105,8 @@ const CartPage: React.FC = () => {
             <button
               onClick={handleCheckout}
               className="btn btn-primary btn-lg btn-block"
-              disabled={placing}
             >
-              {placing ? 'Placing Order...' : isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
+              {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
             </button>
             <button onClick={clearCart} className="clear-cart-btn">
               Clear Cart

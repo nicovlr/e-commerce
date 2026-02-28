@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { logger } from '../config/logger';
 import { AuthService } from '../services/AuthService';
 import { AuthRequest } from '../types';
 
@@ -25,6 +26,7 @@ export class AuthController {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed';
       const status = message === 'Email already registered' ? 409 : 500;
+      if (status === 500) logger.error({ err: error }, 'Registration failed');
       res.status(status).json({ error: message });
     }
   };
@@ -37,6 +39,7 @@ export class AuthController {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       const status = message === 'Invalid credentials' ? 401 : 500;
+      if (status === 500) logger.error({ err: error }, 'Login failed');
       res.status(status).json({ error: message });
     }
   };
@@ -49,7 +52,8 @@ export class AuthController {
         return;
       }
       res.json(user);
-    } catch {
+    } catch (err) {
+      logger.error({ err, userId: req.userId }, 'Failed to fetch profile');
       res.status(500).json({ error: 'Failed to fetch profile' });
     }
   };

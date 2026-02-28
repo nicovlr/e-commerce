@@ -1,46 +1,40 @@
-import React from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface State {
   hasError: boolean;
+  error: Error | null;
 }
 
-class ErrorBoundary extends React.Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('ErrorBoundary caught:', error, errorInfo);
   }
 
-  render() {
+  render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="container" style={{ textAlign: 'center', paddingTop: '6rem' }}>
-          <h1>Something went wrong</h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>
-            An unexpected error occurred. Please try refreshing the page.
-          </p>
-          <div style={{ marginTop: '2rem' }}>
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={() => {
-                this.setState({ hasError: false });
-                window.location.href = '/';
-              }}
-            >
-              Back to Home
-            </button>
-          </div>
+        <div className="error-boundary">
+          <h2>Something went wrong</h2>
+          <p>We're sorry, but an unexpected error occurred.</p>
+          <button
+            className="btn btn-primary"
+            onClick={() => this.setState({ hasError: false, error: null })}
+          >
+            Try Again
+          </button>
         </div>
       );
     }

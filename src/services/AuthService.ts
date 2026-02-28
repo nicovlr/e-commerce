@@ -2,18 +2,19 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import { config } from '../config';
+import { logger } from '../config/logger';
 import { User } from '../models/User';
 import { UserRepository } from '../repositories/UserRepository';
+import { TokenPayload } from '../types';
 import { UserWithoutPassword, stripPassword } from '../utils/stripPassword';
 
-interface TokenPayload {
-  userId: number;
-  email: string;
-  role: 'customer' | 'manager' | 'admin';
-}
+import { PostHogService } from './PostHogService';
 
 export class AuthService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly postHogService?: PostHogService,
+  ) {}
 
   async register(data: {
     email: string;
@@ -26,12 +27,22 @@ export class AuthService {
       throw new Error('Email already registered');
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 12);
+    const hashedPassword = await bcrypt.hash(data.password, config.bcryptRounds);
     const user = await this.userRepository.create({
       ...data,
       password: hashedPassword,
     });
 
+    logger.info({ userId: user.id }, 'User registered');
+    this.postHogService?.capture(String(user.id), 'user_registered', {
+      email: user.email,
+    });
+    this.postHogService?.identify(String(user.id), {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+    });
     const token = this.generateToken(user);
     return { user: stripPassword(user), token };
   }
@@ -50,6 +61,10 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
 
+    logger.info({ userId: user.id }, 'User logged in');
+    this.postHogService?.capture(String(user.id), 'user_logged_in', {
+      email: user.email,
+    });
     const token = this.generateToken(user);
     return { user: stripPassword(user), token };
   }
@@ -61,9 +76,8 @@ export class AuthService {
   }
 
   private generateToken(user: User): string {
-    const payload: TokenPayload = {
+    const payload: TokenPayload & { role: string } = {
       userId: user.id,
-      email: user.email,
       role: user.role,
     };
 
@@ -73,6 +87,10 @@ export class AuthService {
   }
 
   verifyToken(token: string): TokenPayload {
-    return jwt.verify(token, config.jwt.secret) as TokenPayload;
+    const decoded = jwt.verify(token, config.jwt.secret);
+    if (typeof decoded !== 'object' || decoded === null || typeof (decoded as TokenPayload).userId !== 'number') {
+      throw new Error('Invalid token payload');
+    }
+    return decoded as TokenPayload;
   }
 }

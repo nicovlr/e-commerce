@@ -1,0 +1,39 @@
+# ShopSmart E-Commerce - Robots Configuration
+# Allow all standard and AI search crawlers
+
+User-agent: *
+Allow: /
+
+# AI Search Crawlers - Explicitly Allowed
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Sitemaps
+Sitemap: https://shopsmart.com/sitemap.xml
+
+# LLM Documentation
+# See /llms.txt for AI-readable site documentation

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -7,25 +7,45 @@ const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   const isStaff = user?.role === 'manager' || user?.role === 'admin';
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  const closeDropdown = useCallback(() => {
+    setAdminOpen(false);
+    toggleRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setAdminOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!adminOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [adminOpen, closeDropdown]);
+
   return (
-    <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
+    <nav className="navbar" aria-label="Main navigation">
       <div className="navbar-container">
         <Link to="/" className="navbar-brand">
           ShopSmart
@@ -38,27 +58,55 @@ const Navbar: React.FC = () => {
           <Link to="/products" className="nav-link">
             Products
           </Link>
-          {isAuthenticated && isStaff && (
-            <Link to="/admin" className="nav-link">
-              Admin
+          {isAuthenticated && !isStaff && (
+            <Link to="/orders" className="nav-link">
+              Orders
             </Link>
+          )}
+          {isAuthenticated && isStaff && (
+            <div className="admin-dropdown" ref={dropdownRef}>
+              <button
+                ref={toggleRef}
+                className="nav-link admin-dropdown-toggle"
+                onClick={() => setAdminOpen(!adminOpen)}
+                aria-expanded={adminOpen}
+                aria-haspopup="menu"
+              >
+                Admin
+                <span className="dropdown-arrow" aria-hidden="true">{adminOpen ? '\u25B2' : '\u25BC'}</span>
+              </button>
+              {adminOpen && (
+                <div className="admin-dropdown-menu" role="menu">
+                  <Link to="/admin/dashboard" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
+                    Dashboard
+                  </Link>
+                  <Link to="/admin/products" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
+                    Products
+                  </Link>
+                  <Link to="/admin/orders" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
+                    Orders
+                  </Link>
+                  <Link to="/admin/categories" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
+                    Categories
+                  </Link>
+                  <Link to="/analytics" className="admin-dropdown-item" role="menuitem" onClick={() => setAdminOpen(false)}>
+                    Analytics
+                  </Link>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
         <div className="navbar-actions">
-          <Link to="/cart" className="nav-icon-link" aria-label={`Shopping cart${itemCount > 0 ? `, ${itemCount} items` : ''}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 01-8 0" />
-            </svg>
-            {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
+          <Link to="/cart" className="nav-link cart-link" aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ''}`}>
+            Cart {itemCount > 0 && <span className="cart-badge" aria-hidden="true">{itemCount}</span>}
           </Link>
 
           {isAuthenticated ? (
             <div className="auth-section">
-              <span className="user-greeting">{user?.firstName}</span>
-              <button onClick={handleLogout} className="btn btn-outline btn-sm">
+              <span className="user-name">{user?.firstName}</span>
+              <button onClick={handleLogout} className="btn btn-outline" aria-label="Logout">
                 Logout
               </button>
             </div>

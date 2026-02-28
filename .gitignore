@@ -43,6 +43,13 @@ ai-service/.pytest_cache/
 ai-service/models/*.joblib
 !ai-service/models/.gitkeep
 
+# Terraform
+infrastructure/.terraform/
+infrastructure/*.tfstate
+infrastructure/*.tfstate.backup
+infrastructure/*.tfvars
+!infrastructure/*.tfvars.example
+
 # Misc
 *.tgz
 .cache/

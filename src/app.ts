@@ -1,28 +1,42 @@
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import pinoHttp from 'pino-http';
+import swaggerUi from 'swagger-ui-express';
 
+import { config } from './config';
 import { AppDataSource } from './config/database';
+import { logger } from './config/logger';
+import { swaggerSpec } from './config/swagger';
 import { AIController } from './controllers/AIController';
+import { AnalyticsController } from './controllers/AnalyticsController';
 import { AuthController } from './controllers/AuthController';
 import { CategoryController } from './controllers/CategoryController';
 import { OrderController } from './controllers/OrderController';
 import { ProductController } from './controllers/ProductController';
 import { UserController } from './controllers/UserController';
+import { WebhookController } from './controllers/WebhookController';
 import { errorMiddleware } from './middleware/errorMiddleware';
 import { Category } from './models/Category';
 import { Order } from './models/Order';
 import { Product } from './models/Product';
 import { User } from './models/User';
+import { AnalyticsRepository } from './repositories/AnalyticsRepository';
 import { CategoryRepository } from './repositories/CategoryRepository';
 import { OrderRepository } from './repositories/OrderRepository';
 import { ProductRepository } from './repositories/ProductRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { createApiRoutes } from './routes';
+import { createSitemapRoutes } from './routes/sitemapRoutes';
+import { createWebhookRoutes } from './routes/webhookRoutes';
 import { AIService } from './services/AIService';
+import { AnalyticsService } from './services/AnalyticsService';
 import { AuthService } from './services/AuthService';
 import { CategoryService } from './services/CategoryService';
 import { OrderService } from './services/OrderService';
+import { PaymentService } from './services/PaymentService';
+import { PostHogService } from './services/PostHogService';
 import { ProductService } from './services/ProductService';
 import { UserService } from './services/UserService';
 
@@ -31,15 +45,29 @@ export function createApp(): Application {
 
   // Security middleware
   app.use(helmet());
-  app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
-    credentials: true,
-  }));
-  app.use(express.json({ limit: '1mb' }));
+  app.use(
+    cors({
+      origin: config.cors.origins,
+      credentials: true,
+    }),
+  );
 
-  // Health check
-  app.get('/health', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  // Global rate limiting for all API routes
+  const globalLimiter = rateLimit({
+    windowMs: config.rateLimit.windowMs,
+    max: config.rateLimit.max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' },
+  });
+
+  // Stricter rate limiting on auth routes
+  const authLimiter = rateLimit({
+    windowMs: config.rateLimit.windowMs,
+    max: Math.min(config.rateLimit.max, 20),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' },
   });
 
   // Dependency Injection - Repositories
@@ -47,14 +75,18 @@ export function createApp(): Application {
   const productRepository = new ProductRepository(AppDataSource.getRepository(Product));
   const orderRepository = new OrderRepository(AppDataSource.getRepository(Order));
   const categoryRepository = new CategoryRepository(AppDataSource.getRepository(Category));
+  const analyticsRepository = new AnalyticsRepository(AppDataSource);
 
   // Dependency Injection - Services
-  const authService = new AuthService(userRepository);
+  const postHogService = new PostHogService();
+  const paymentService = new PaymentService();
+  const authService = new AuthService(userRepository, postHogService);
   const productService = new ProductService(productRepository);
-  const orderService = new OrderService(orderRepository);
+  const orderService = new OrderService(orderRepository, productRepository, postHogService, paymentService);
   const categoryService = new CategoryService(categoryRepository);
   const aiService = new AIService();
   const userService = new UserService(userRepository);
+  const analyticsService = new AnalyticsService(analyticsRepository);
 
   // Dependency Injection - Controllers
   const authController = new AuthController(authService);
@@ -63,6 +95,56 @@ export function createApp(): Application {
   const categoryController = new CategoryController(categoryService);
   const aiController = new AIController(aiService);
   const userController = new UserController(userService);
+  const analyticsController = new AnalyticsController(analyticsService);
+  const webhookController = new WebhookController(paymentService, orderService);
+
+  // Stripe webhook route MUST be mounted BEFORE express.json() to get raw body
+  app.use(
+    '/api/webhooks',
+    express.raw({ type: 'application/json' }),
+    createWebhookRoutes(webhookController),
+  );
+
+  app.use(express.json({ limit: '10kb' }));
+
+  // Structured HTTP logging
+  app.use(pinoHttp({ logger }));
+
+  // Health check with DB connectivity
+  app.get('/health', async (_req: Request, res: Response) => {
+    try {
+      const dbConnected = AppDataSource.isInitialized;
+      if (dbConnected) {
+        await AppDataSource.query('SELECT 1');
+      }
+      res.json({
+        status: dbConnected ? 'ok' : 'degraded',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: dbConnected ? 'connected' : 'disconnected',
+      });
+    } catch {
+      res.status(503).json({
+        status: 'degraded',
+        timestamp: new Date().toISOString(),
+        database: 'error',
+      });
+    }
+  });
+
+  // Swagger API documentation
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get('/api/docs.json', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
+
+  // Apply rate limiting
+  app.use('/api', globalLimiter);
+  app.use('/api/auth', authLimiter);
+
+  // Sitemap route (before API routes so it's accessible at /sitemap.xml)
+  app.use(createSitemapRoutes(productRepository));
 
   // Routes
   app.use(
@@ -74,8 +156,16 @@ export function createApp(): Application {
       categoryController,
       aiController,
       userController,
+      analyticsController,
     ),
   );
+
+  // Payment timeout job — run every 5 minutes
+  setInterval(() => {
+    orderService.cancelExpiredOrders().catch((err) => {
+      logger.error({ err }, 'Payment timeout job failed');
+    });
+  }, 5 * 60 * 1000);
 
   // Error handling
   app.use(errorMiddleware);

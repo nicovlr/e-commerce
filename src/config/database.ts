@@ -7,6 +7,8 @@ import { OrderItem } from '../models/OrderItem';
 import { Product } from '../models/Product';
 import { SalesRecord } from '../models/SalesRecord';
 import { User } from '../models/User';
+import { InitialSchema1709000000000 } from '../migrations/1709000000000-InitialSchema';
+import { AddPaymentFields1709100000000 } from '../migrations/1709100000000-AddPaymentFields';
 
 dotenv.config();
 
@@ -17,9 +19,14 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'ecommerce',
-  synchronize: process.env.NODE_ENV !== 'production',
+  synchronize: false,
   logging: process.env.NODE_ENV === 'development',
   entities: [User, Product, Category, Order, OrderItem, SalesRecord],
-  migrations: [],
+  migrations: [InitialSchema1709000000000, AddPaymentFields1709100000000],
   subscribers: [],
+  extra: {
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  },
 });

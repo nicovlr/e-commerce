@@ -1,3 +1,4 @@
+import posthog from 'posthog-js';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, LoginCredentials, RegisterData } from '../types';
 import { authService } from '../services/authService';
@@ -49,6 +50,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('token', response.token);
     localStorage.setItem('user', JSON.stringify(response.user));
     setUser(response.user);
+    posthog.identify(String(response.user.id), {
+      email: response.user.email,
+      name: response.user.name,
+      role: response.user.role,
+    });
   };
 
   const register = async (data: RegisterData) => {
@@ -56,12 +62,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('token', response.token);
     localStorage.setItem('user', JSON.stringify(response.user));
     setUser(response.user);
+    posthog.identify(String(response.user.id), {
+      email: response.user.email,
+      name: response.user.name,
+      role: response.user.role,
+    });
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    posthog.reset();
   };
 
   return (

@@ -1,9 +1,14 @@
 import api from './api';
 import { Product, Category } from '../types';
 
+interface PaginatedResponse {
+  data: Product[];
+  meta: { page: number; limit: number; total: number; totalPages: number };
+}
+
 export const productService = {
-  async getAll(): Promise<Product[]> {
-    const response = await api.get<Product[]>('/products');
+  async getAll(params?: { page?: number; limit?: number; search?: string; categoryId?: number }): Promise<PaginatedResponse> {
+    const response = await api.get<PaginatedResponse>('/products', { params });
     return response.data;
   },
 

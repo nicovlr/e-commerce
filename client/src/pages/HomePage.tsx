@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { Product } from '../types';
 import { productService } from '../services/productService';
 import ProductCard from '../components/ProductCard';
+import JsonLd from '../components/JsonLd';
+import MetaTags from '../components/MetaTags';
+import { getOrganizationSchema, getWebSiteSchema } from '../utils/structuredData';
 
 const HomePage: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -12,8 +15,8 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const products = await productService.getAll();
-        setFeaturedProducts(products.slice(0, 6));
+        const result = await productService.getAll({ limit: 6 });
+        setFeaturedProducts(result.data);
       } catch {
         setError('Failed to load products. Please try again later.');
       } finally {
@@ -25,6 +28,12 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="home-page">
+      <MetaTags
+        title="ShopSmart - AI-Powered E-Commerce"
+        description="Discover amazing products with intelligent inventory management and demand forecasting."
+      />
+      <JsonLd data={getOrganizationSchema()} />
+      <JsonLd data={getWebSiteSchema()} />
       <section className="hero">
         <div className="hero-content">
           <span className="hero-eyebrow">New Collection 2026</span>

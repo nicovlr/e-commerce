@@ -9,6 +9,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 
+import { OrderStatus, PaymentStatus, ShippingAddress } from '../types';
+
 import { OrderItem } from './OrderItem';
 import { User } from './User';
 
@@ -24,11 +26,20 @@ export class Order {
   @Column()
   userId: number;
 
-  @Column({ default: 'pending' })
-  status: string;
+  @Column({ type: 'varchar', default: OrderStatus.PENDING })
+  status: OrderStatus;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalAmount: number;
+
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  stripePaymentIntentId: string | null;
+
+  @Column({ type: 'varchar', default: PaymentStatus.UNPAID })
+  paymentStatus: PaymentStatus;
+
+  @Column({ type: 'jsonb', nullable: true })
+  shippingAddress: ShippingAddress | null;
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
   items: OrderItem[];

@@ -1,7 +1,7 @@
 import { Repository, LessThanOrEqual } from 'typeorm';
 
 import { Product } from '../models/Product';
-import { ProductFilter } from '../types';
+import { PaginatedResult, PaginationQuery, ProductFilter } from '../types';
 
 import { BaseRepository } from './BaseRepository';
 
@@ -17,7 +17,14 @@ export class ProductRepository extends BaseRepository<Product> {
     });
   }
 
-  async findWithFilters(filters: ProductFilter): Promise<Product[]> {
+  async findWithFilters(
+    filters: ProductFilter,
+    pagination?: PaginationQuery,
+  ): Promise<PaginatedResult<Product>> {
+    const page = pagination?.page || 1;
+    const limit = pagination?.limit || 20;
+    const skip = (page - 1) * limit;
+
     const queryBuilder = this.repository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category');
@@ -48,7 +55,17 @@ export class ProductRepository extends BaseRepository<Product> {
 
     queryBuilder.andWhere('product.isActive = :isActive', { isActive: true });
 
-    return queryBuilder.getMany();
+    const [data, total] = await queryBuilder.skip(skip).take(limit).getManyAndCount();
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findLowStock(threshold: number = 10): Promise<Product[]> {
@@ -62,10 +79,14 @@ export class ProductRepository extends BaseRepository<Product> {
   }
 
   async updateStock(productId: number, quantity: number): Promise<Product | null> {
-    const product = await this.findById(productId);
-    if (!product) return null;
+    // Atomic stock update to prevent race conditions
+    await this.repository
+      .createQueryBuilder()
+      .update(Product)
+      .set({ stock: () => `GREATEST(0, stock + ${quantity})` })
+      .where('id = :id', { id: productId })
+      .execute();
 
-    product.stock = Math.max(0, product.stock + quantity);
-    return this.repository.save(product);
+    return this.findById(productId);
   }
 }

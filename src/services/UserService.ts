@@ -1,4 +1,5 @@
 import { UserRepository } from '../repositories/UserRepository';
+import { UserRole } from '../types';
 import { UserWithoutPassword, stripPassword } from '../utils/stripPassword';
 
 export class UserService {
@@ -11,7 +12,7 @@ export class UserService {
 
   async updateUserRole(
     userId: number,
-    role: 'customer' | 'manager' | 'admin',
+    role: UserRole,
   ): Promise<UserWithoutPassword | null> {
     const user = await this.userRepository.update(userId, { role });
     if (!user) return null;

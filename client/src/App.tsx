@@ -1,66 +1,109 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
-import AdminLayout from './components/AdminLayout';
-import HomePage from './pages/HomePage';
-import ProductsPage from './pages/ProductsPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import CartPage from './pages/CartPage';
-import LoginPage from './pages/LoginPage';
-import NotFoundPage from './pages/NotFoundPage';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
-import AdminProductsPage from './pages/admin/AdminProductsPage';
-import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
-import AdminOrdersPage from './pages/admin/AdminOrdersPage';
-import AdminUsersPage from './pages/admin/AdminUsersPage';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Code splitting with lazy loading
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const AnalyticsDashboardPage = lazy(() => import('./pages/AnalyticsDashboardPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// Admin pages
+const AdminLayout = lazy(() => import('./components/AdminLayout'));
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
+const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
+const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage'));
+const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'));
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
+
+const LoadingFallback: React.FC = () => (
+  <div className="loading-container">
+    <div className="spinner" />
+    <p>Loading...</p>
+  </div>
+);
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
-          <ErrorBoundary>
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<HomePage />} />
-                <Route path="products" element={<ProductsPage />} />
-                <Route path="products/:id" element={<ProductDetailPage />} />
-                <Route path="cart" element={<CartPage />} />
-                <Route path="login" element={<LoginPage />} />
-                <Route path="dashboard" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route
-                  path="admin"
-                  element={
-                    <ProtectedRoute requiredRole="staff">
-                      <AdminLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="dashboard" element={<AdminDashboardPage />} />
-                  <Route path="products" element={<AdminProductsPage />} />
-                  <Route path="categories" element={<AdminCategoriesPage />} />
-                  <Route path="orders" element={<AdminOrdersPage />} />
+    <ErrorBoundary>
+      <AuthProvider>
+        <CartProvider>
+          <ToastProvider>
+          <Router>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="products" element={<ProductsPage />} />
+                  <Route path="products/:id" element={<ProductDetailPage />} />
+                  <Route path="cart" element={<CartPage />} />
                   <Route
-                    path="users"
+                    path="checkout"
                     element={
-                      <ProtectedRoute requiredRole="admin">
-                        <AdminUsersPage />
+                      <ProtectedRoute>
+                        <CheckoutPage />
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="login" element={<LoginPage />} />
+                  <Route path="dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route
+                    path="analytics"
+                    element={
+                      <ProtectedRoute requiredRole="staff">
+                        <AnalyticsDashboardPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="orders"
+                    element={
+                      <ProtectedRoute>
+                        <OrdersPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="admin"
+                    element={
+                      <ProtectedRoute requiredRole="staff">
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboardPage />} />
+                    <Route path="products" element={<AdminProductsPage />} />
+                    <Route path="categories" element={<AdminCategoriesPage />} />
+                    <Route path="orders" element={<AdminOrdersPage />} />
+                    <Route
+                      path="users"
+                      element={
+                        <ProtectedRoute requiredRole="admin">
+                          <AdminUsersPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
+                  <Route path="*" element={<NotFoundPage />} />
                 </Route>
-                <Route path="*" element={<NotFoundPage />} />
-              </Route>
-            </Routes>
-          </ErrorBoundary>
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+              </Routes>
+            </Suspense>
+          </Router>
+          </ToastProvider>
+        </CartProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 

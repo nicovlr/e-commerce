@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { AIController } from '../controllers/AIController';
+import { AnalyticsController } from '../controllers/AnalyticsController';
 import { AuthController } from '../controllers/AuthController';
 import { CategoryController } from '../controllers/CategoryController';
 import { OrderController } from '../controllers/OrderController';
@@ -8,6 +9,7 @@ import { ProductController } from '../controllers/ProductController';
 import { UserController } from '../controllers/UserController';
 
 import { createAIRoutes } from './aiRoutes';
+import { createAnalyticsRoutes } from './analyticsRoutes';
 import { createAuthRoutes } from './authRoutes';
 import { createCategoryRoutes } from './categoryRoutes';
 import { createOrderRoutes } from './orderRoutes';
@@ -21,6 +23,7 @@ export const createApiRoutes = (
   categoryController: CategoryController,
   aiController: AIController,
   userController: UserController,
+  analyticsController: AnalyticsController,
 ): Router => {
   const router = Router();
 
@@ -30,6 +33,7 @@ export const createApiRoutes = (
   router.use('/categories', createCategoryRoutes(categoryController));
   router.use('/ai', createAIRoutes(aiController));
   router.use('/users', createUserRoutes(userController));
+  router.use('/analytics', createAnalyticsRoutes(analyticsController));
 
   return router;
 };

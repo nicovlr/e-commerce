@@ -3,6 +3,19 @@ import { Product, DemandPrediction, StockAlert } from '../types';
 import { productService } from '../services/productService';
 import { aiService } from '../services/aiService';
 
+const getAlertTypeLabel = (alertType: string): string => {
+  switch (alertType) {
+    case 'low_stock':
+      return 'Low Stock';
+    case 'overstock':
+      return 'Overstock';
+    case 'trending':
+      return 'Trending';
+    default:
+      return alertType;
+  }
+};
+
 const DashboardPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [alerts, setAlerts] = useState<StockAlert[]>([]);
@@ -16,14 +29,17 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, alertsData] = await Promise.all([
-          productService.getAll(),
-          aiService.getAlerts(),
-        ]);
-        setProducts(productsData);
+        const result = await productService.getAll();
+        setProducts(result.data);
+      } catch {
+        setError('Failed to load products.');
+      }
+
+      try {
+        const alertsData = await aiService.getAlerts();
         setAlerts(alertsData);
       } catch {
-        setError('Failed to load dashboard data.');
+        // AI service may be offline — alerts simply stay empty
       } finally {
         setLoadingAlerts(false);
       }
@@ -55,10 +71,13 @@ const DashboardPage: React.FC = () => {
   const getSeverityClass = (severity: string): string => {
     switch (severity) {
       case 'critical':
+      case 'high':
         return 'severity-critical';
       case 'warning':
+      case 'medium':
         return 'severity-warning';
       case 'info':
+      case 'low':
         return 'severity-info';
       default:
         return '';
@@ -118,17 +137,16 @@ const DashboardPage: React.FC = () => {
                   <span className="prediction-value">{prediction.currentStock}</span>
                 </div>
                 <div className="prediction-card">
-                  <span className="prediction-label">7-Day Demand</span>
-                  <span className="prediction-value">{prediction.predictedDemand7d}</span>
+                  <span className="prediction-label">Predicted Demand</span>
+                  <span className="prediction-value">{prediction.predictedDemand}</span>
                 </div>
                 <div className="prediction-card">
-                  <span className="prediction-label">30-Day Demand</span>
-                  <span className="prediction-value">{prediction.predictedDemand30d}</span>
+                  <span className="prediction-label">Confidence</span>
+                  <span className="prediction-value">{(prediction.confidence * 100).toFixed(0)}%</span>
                 </div>
               </div>
               <div className="recommendation-box">
-                <strong>Restock Recommended:</strong>{' '}
-                {prediction.restockRecommended ? 'Yes' : 'No'}
+                <strong>Recommendation:</strong> {prediction.recommendation}
               </div>
             </div>
           )}
@@ -156,15 +174,16 @@ const DashboardPage: React.FC = () => {
               {alerts.map((alert, index) => (
                 <div key={index} className={`alert-card ${getSeverityClass(alert.severity)}`}>
                   <div className="alert-card-header">
+                    <span className="alert-type-badge">{getAlertTypeLabel(alert.alertType)}</span>
                     <span className={`severity-badge ${getSeverityClass(alert.severity)}`}>
                       {alert.severity.toUpperCase()}
                     </span>
                   </div>
                   <h3 className="alert-product-name">{alert.productName}</h3>
+                  <p className="alert-message">{alert.message}</p>
                   <div className="alert-details">
                     <span>Current Stock: {alert.currentStock}</span>
-                    <span>Predicted Demand: {alert.predictedDemand}</span>
-                    <span>Days Until Stockout: {alert.daysUntilStockout}</span>
+                    <span>Threshold: {alert.threshold}</span>
                   </div>
                 </div>
               ))}

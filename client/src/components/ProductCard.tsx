@@ -4,11 +4,13 @@ import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { getPlaceholderEmoji } from '../utils/categoryEmoji';
 
+const LOW_STOCK_THRESHOLD = 5;
+
 interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
   const { addItem } = useCart();
   const [imgError, setImgError] = useState(false);
 
@@ -29,6 +31,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               src={product.imageUrl}
               alt={product.name}
               className="product-image"
+              loading="lazy"
               onError={() => setImgError(true)}
             />
           ) : (
@@ -36,7 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {getPlaceholderEmoji(product.category?.name)}
             </span>
           )}
-          {product.stock <= 5 && product.stock > 0 && (
+          {product.stock <= LOW_STOCK_THRESHOLD && product.stock > 0 && (
             <span className="stock-badge low-stock">Low Stock</span>
           )}
           {product.stock === 0 && <span className="stock-badge out-of-stock">Out of Stock</span>}
@@ -64,6 +67,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </Link>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

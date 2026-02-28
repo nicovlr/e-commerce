@@ -7,6 +7,8 @@ import {
   OneToMany,
 } from 'typeorm';
 
+import { UserRole } from '../types';
+
 import { Order } from './Order';
 
 @Entity('users')
@@ -26,8 +28,8 @@ export class User {
   @Column()
   lastName: string;
 
-  @Column({ type: 'enum', enum: ['customer', 'manager', 'admin'], default: 'customer' })
-  role: 'customer' | 'manager' | 'admin';
+  @Column({ type: 'varchar', default: UserRole.CUSTOMER })
+  role: UserRole;
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
