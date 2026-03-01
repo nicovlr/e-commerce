@@ -13,6 +13,7 @@ import {
   ShippingAddress,
 } from '../types';
 
+import { DeliveryService } from './DeliveryService';
 import { PaymentService } from './PaymentService';
 import { PostHogService } from './PostHogService';
 
@@ -30,7 +31,12 @@ export class OrderService {
     private readonly productRepository: ProductRepository,
     private readonly postHogService?: PostHogService,
     private readonly paymentService?: PaymentService,
+    private deliveryService?: DeliveryService,
   ) {}
+
+  setDeliveryService(deliveryService: DeliveryService): void {
+    this.deliveryService = deliveryService;
+  }
 
   async createOrder(
     userId: number,
@@ -140,6 +146,9 @@ export class OrderService {
       status: OrderStatus.PROCESSING,
     });
 
+    // Auto-create delivery
+    await this.autoCreateDelivery(order.id);
+
     logger.info({ orderId: order.id, paymentIntentId }, 'Payment succeeded, order processing');
   }
 
@@ -237,7 +246,7 @@ export class OrderService {
   }
 
   async updateOrderStatus(orderId: number, newStatus: OrderStatus): Promise<Order | null> {
-    return AppDataSource.transaction(async (manager) => {
+    const result = await AppDataSource.transaction(async (manager) => {
       const order = await manager.findOne(Order, {
         where: { id: orderId },
         relations: ['items', 'items.product', 'user'],
@@ -279,5 +288,23 @@ export class OrderService {
 
       return order;
     });
+
+    // Auto-create delivery outside transaction
+    if (result && newStatus === OrderStatus.PROCESSING) {
+      await this.autoCreateDelivery(orderId);
+    }
+
+    return result;
+  }
+
+  private async autoCreateDelivery(orderId: number): Promise<void> {
+    if (!this.deliveryService) return;
+    try {
+      await this.deliveryService.createDelivery(orderId, {});
+      logger.info({ orderId }, 'Delivery auto-created for order');
+    } catch (error) {
+      // Don't fail the order transition if delivery creation fails
+      logger.warn({ err: error, orderId }, 'Failed to auto-create delivery');
+    }
   }
 }

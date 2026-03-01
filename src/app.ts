@@ -100,6 +100,7 @@ export function createApp(): Application {
   const aiService = new AIService();
   const userService = new UserService(userRepository);
   const deliveryService = new DeliveryService(deliveryRepository, orderRepository);
+  orderService.setDeliveryService(deliveryService);
   const analyticsService = new AnalyticsService(analyticsRepository);
 
   // Dependency Injection - Controllers

@@ -63,6 +63,23 @@ export interface OrderItem {
   product?: Product;
 }
 
+export type DeliveryStatus = 'preparing' | 'shipped' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'failed';
+
+export interface Delivery {
+  id: number;
+  orderId: number;
+  status: DeliveryStatus;
+  trackingNumber: string | null;
+  carrier: string | null;
+  estimatedDeliveryDate: string | null;
+  shippedAt: string | null;
+  deliveredAt: string | null;
+  notes: string | null;
+  order?: Order;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface CartItem {
   product: Product;
   quantity: number;

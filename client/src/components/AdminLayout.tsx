@@ -36,6 +36,12 @@ const AdminLayout: React.FC = () => {
             Orders
           </NavLink>
           <NavLink
+            to="/admin/deliveries"
+            className={({ isActive }) => `admin-nav-link${isActive ? ' active' : ''}`}
+          >
+            Deliveries
+          </NavLink>
+          <NavLink
             to="/analytics"
             className={({ isActive }) => `admin-nav-link${isActive ? ' active' : ''}`}
           >

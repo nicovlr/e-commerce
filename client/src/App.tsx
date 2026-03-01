@@ -24,6 +24,7 @@ const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage')
 const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
 const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage'));
 const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'));
+const AdminDeliveriesPage = lazy(() => import('./pages/admin/AdminDeliveriesPage'));
 const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
 
 const LoadingFallback: React.FC = () => (
@@ -86,6 +87,7 @@ const App: React.FC = () => {
                     <Route path="products" element={<AdminProductsPage />} />
                     <Route path="categories" element={<AdminCategoriesPage />} />
                     <Route path="orders" element={<AdminOrdersPage />} />
+                    <Route path="deliveries" element={<AdminDeliveriesPage />} />
                     <Route
                       path="users"
                       element={
