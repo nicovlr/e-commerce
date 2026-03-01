@@ -1,30 +1,33 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 import { config } from '../config';
 import { DemandPrediction, StockAlert } from '../types';
 
 export class AIService {
-  private readonly baseUrl: string;
+  private readonly client: AxiosInstance;
 
   constructor() {
-    this.baseUrl = config.aiService.url;
+    this.client = axios.create({
+      baseURL: config.aiService.url,
+      timeout: 5000,
+    });
   }
 
   async getPrediction(productId: number): Promise<DemandPrediction> {
-    const response = await axios.post<DemandPrediction>(`${this.baseUrl}/predict`, {
+    const response = await this.client.post<DemandPrediction>('/predict', {
       product_id: productId,
     });
     return response.data;
   }
 
   async getStockAlerts(): Promise<StockAlert[]> {
-    const response = await axios.get<StockAlert[]>(`${this.baseUrl}/alerts`);
+    const response = await this.client.get<StockAlert[]>('/alerts');
     return response.data;
   }
 
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await axios.get(`${this.baseUrl}/health`);
+      const response = await this.client.get('/health');
       return response.status === 200;
     } catch {
       return false;

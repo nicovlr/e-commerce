@@ -1,5 +1,6 @@
 import { Response } from 'express';
 
+import { logger } from '../config/logger';
 import { UserService } from '../services/UserService';
 import { AuthRequest } from '../types';
 
@@ -12,8 +13,10 @@ export class UserController {
     try {
       const users = await this.userService.getAllUsers();
       res.json(users);
-    } catch {
-      res.status(500).json({ error: 'Failed to fetch users' });
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to fetch users');
+      const message = error instanceof Error ? error.message : 'Failed to fetch users';
+      res.status(500).json({ error: message });
     }
   };
 
@@ -28,17 +31,32 @@ export class UserController {
         return;
       }
 
-      const user = await this.userService.updateUserRole(
-        Number(req.params.id),
-        role,
-      );
+      // Only admins can assign the admin role
+      if (role === 'admin' && req.userRole !== 'admin') {
+        res.status(403).json({ error: 'Only admins can promote users to admin' });
+        return;
+      }
+
+      const targetUserId = Number(req.params.id);
+      const oldUser = await this.userService.getUserById(targetUserId);
+      const oldRole = oldUser?.role;
+
+      const user = await this.userService.updateUserRole(targetUserId, role);
       if (!user) {
         res.status(404).json({ error: 'User not found' });
         return;
       }
+
+      logger.info(
+        { adminId: req.userId, targetUserId, oldRole, newRole: role },
+        'User role updated',
+      );
+
       res.json(user);
-    } catch {
-      res.status(500).json({ error: 'Failed to update user role' });
+    } catch (error) {
+      logger.error({ err: error, targetUserId: req.params.id }, 'Failed to update user role');
+      const message = error instanceof Error ? error.message : 'Failed to update user role';
+      res.status(500).json({ error: message });
     }
   };
 }

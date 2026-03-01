@@ -44,7 +44,15 @@ export function createApp(): Application {
   const app = express();
 
   // Security middleware
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+        },
+      },
+    }),
+  );
   app.use(
     cors({
       origin: config.cors.origins,

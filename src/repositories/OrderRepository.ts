@@ -10,12 +10,28 @@ export class OrderRepository extends BaseRepository<Order> {
     super(repository);
   }
 
-  async findByUserId(userId: number): Promise<Order[]> {
-    return this.repository.find({
+  async findByUserId(userId: number, pagination?: PaginationQuery): Promise<PaginatedResult<Order>> {
+    const page = pagination?.page || 1;
+    const limit = pagination?.limit || 20;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.repository.findAndCount({
       where: { userId },
       relations: ['items', 'items.product'],
       order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
     });
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findAllWithRelations(pagination?: PaginationQuery): Promise<PaginatedResult<Order>> {

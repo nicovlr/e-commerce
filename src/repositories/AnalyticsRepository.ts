@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 
+import { config } from '../config';
 import {
   AnalyticsQuery,
   CustomerInsights,
@@ -269,7 +270,7 @@ export class AnalyticsRepository {
       .addSelect('c.name', 'categoryName')
       .from('products', 'p')
       .leftJoin('categories', 'c', 'c.id = p."categoryId"')
-      .where('p.stock <= 10')
+      .where('p.stock <= :threshold', { threshold: config.stock.lowThreshold })
       .andWhere('p."isActive" = true')
       .orderBy('p.stock', 'ASC')
       .getRawMany();

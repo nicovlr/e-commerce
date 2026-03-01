@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 import { User } from '../models/User';
 
@@ -10,7 +10,7 @@ export class UserRepository extends BaseRepository<User> {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.repository.findOneBy({ email });
+    return this.repository.findOneBy({ email: ILike(email) });
   }
 
   async findAll(): Promise<User[]> {

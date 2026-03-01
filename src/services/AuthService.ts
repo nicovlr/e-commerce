@@ -22,6 +22,7 @@ export class AuthService {
     firstName: string;
     lastName: string;
   }): Promise<{ user: UserWithoutPassword; token: string }> {
+    data.email = data.email.toLowerCase();
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new Error('Email already registered');
@@ -51,7 +52,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<{ user: UserWithoutPassword; token: string }> {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email.toLowerCase());
     if (!user) {
       throw new Error('Invalid credentials');
     }

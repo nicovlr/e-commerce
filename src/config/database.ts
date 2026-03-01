@@ -12,6 +12,12 @@ import { AddPaymentFields1709100000000 } from '../migrations/1709100000000-AddPa
 
 dotenv.config();
 
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.DB_USERNAME || !process.env.DB_PASSWORD) {
+    console.warn('[database] Using default database credentials in production — this is a security risk');
+  }
+}
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',

@@ -1,12 +1,23 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 
 import { AnalyticsController } from '../controllers/AnalyticsController';
 import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
+
+const analyticsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many analytics requests, please try again later' },
+});
 
 export const createAnalyticsRoutes = (
   controller: AnalyticsController,
 ): Router => {
   const router = Router();
+
+  router.use(analyticsLimiter);
 
   /**
    * @swagger

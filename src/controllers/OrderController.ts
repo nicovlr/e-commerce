@@ -73,8 +73,12 @@ export class OrderController {
 
   getUserOrders = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const orders = await this.orderService.getUserOrders(req.userId!);
-      res.json(orders);
+      const pagination: PaginationQuery = {
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      };
+      const result = await this.orderService.getUserOrders(req.userId!, pagination);
+      res.json(result);
     } catch (err) {
       logger.error({ err, userId: req.userId }, 'Failed to fetch user orders');
       res.status(500).json({ error: 'Failed to fetch orders' });

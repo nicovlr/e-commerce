@@ -20,7 +20,11 @@ export const validateProduct = [
 
 export const validateRegister = [
   body('email').isEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters')
+    .matches(/^(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('Password must contain at least one uppercase letter and one digit'),
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
   handleValidationErrors,

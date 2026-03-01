@@ -232,26 +232,31 @@ export class OrderService {
     return this.orderRepository.findWithItems(orderId);
   }
 
-  async getUserOrders(userId: number): Promise<Order[]> {
-    return this.orderRepository.findByUserId(userId);
+  async getUserOrders(userId: number, pagination?: PaginationQuery): Promise<PaginatedResult<Order>> {
+    return this.orderRepository.findByUserId(userId, pagination);
   }
 
   async updateOrderStatus(orderId: number, newStatus: OrderStatus): Promise<Order | null> {
-    const order = await this.orderRepository.findWithItems(orderId);
-    if (!order) {
-      return null;
-    }
+    return AppDataSource.transaction(async (manager) => {
+      const order = await manager.findOne(Order, {
+        where: { id: orderId },
+        relations: ['items', 'items.product', 'user'],
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    const allowed = VALID_TRANSITIONS[order.status as OrderStatus];
-    if (!allowed || !allowed.includes(newStatus)) {
-      throw new Error(
-        `Invalid status transition from '${order.status}' to '${newStatus}'`,
-      );
-    }
+      if (!order) {
+        return null;
+      }
 
-    // Restock items when cancelling
-    if (newStatus === OrderStatus.CANCELLED && order.items?.length) {
-      await AppDataSource.transaction(async (manager) => {
+      const allowed = VALID_TRANSITIONS[order.status as OrderStatus];
+      if (!allowed || !allowed.includes(newStatus)) {
+        throw new Error(
+          `Invalid status transition from '${order.status}' to '${newStatus}'`,
+        );
+      }
+
+      // Restock items when cancelling
+      if (newStatus === OrderStatus.CANCELLED && order.items?.length) {
         for (const item of order.items) {
           await manager
             .createQueryBuilder()
@@ -261,18 +266,18 @@ export class OrderService {
             .where('id = :id', { id: item.productId })
             .execute();
         }
-        await manager
-          .createQueryBuilder()
-          .update('orders')
-          .set({ status: newStatus })
-          .where('id = :id', { id: orderId })
-          .execute();
-      });
-      logger.info({ orderId, status: newStatus, restocked: true }, 'Order cancelled, stock restored');
-      return this.orderRepository.findWithItems(orderId);
-    }
+      }
 
-    logger.info({ orderId, status: newStatus }, 'Order status updated');
-    return this.orderRepository.update(orderId, { status: newStatus });
+      order.status = newStatus;
+      await manager.save(order);
+
+      if (newStatus === OrderStatus.CANCELLED) {
+        logger.info({ orderId, status: newStatus, restocked: true }, 'Order cancelled, stock restored');
+      } else {
+        logger.info({ orderId, status: newStatus }, 'Order status updated');
+      }
+
+      return order;
+    });
   }
 }

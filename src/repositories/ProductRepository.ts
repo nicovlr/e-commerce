@@ -1,5 +1,6 @@
 import { Repository, LessThanOrEqual } from 'typeorm';
 
+import { config } from '../config';
 import { Product } from '../models/Product';
 import { PaginatedResult, PaginationQuery, ProductFilter } from '../types';
 
@@ -68,7 +69,7 @@ export class ProductRepository extends BaseRepository<Product> {
     };
   }
 
-  async findLowStock(threshold: number = 10): Promise<Product[]> {
+  async findLowStock(threshold: number = config.stock.lowThreshold): Promise<Product[]> {
     return this.repository.find({
       where: {
         stock: LessThanOrEqual(threshold),

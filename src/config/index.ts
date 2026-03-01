@@ -7,6 +7,39 @@ if (!jwtSecret && process.env.NODE_ENV === 'production') {
   throw new Error('JWT_SECRET environment variable must be set in production');
 }
 
+if (!process.env.STRIPE_WEBHOOK_SECRET) {
+  // Lazy-import to avoid circular dependency with logger
+  const warn = (msg: string) => console.warn(`[config] ${msg}`);
+  warn('STRIPE_WEBHOOK_SECRET is not set — Stripe webhook signature verification will be disabled');
+}
+
+// Validate AI_SERVICE_URL is a safe HTTP(S) URL (anti-SSRF)
+const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+if (process.env.AI_SERVICE_URL) {
+  try {
+    const parsed = new URL(aiServiceUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error(`AI_SERVICE_URL must use http or https protocol, got: ${parsed.protocol}`);
+    }
+    const privatePatterns = [
+      /^127\./,
+      /^10\./,
+      /^172\.(1[6-9]|2\d|3[01])\./,
+      /^192\.168\./,
+      /^169\.254\./,
+      /^0\./,
+    ];
+    if (privatePatterns.some((p) => p.test(parsed.hostname)) || parsed.hostname === 'localhost') {
+      console.warn('[config] AI_SERVICE_URL points to a private/local address — ensure this is intentional');
+    }
+  } catch (e) {
+    if (e instanceof TypeError) {
+      throw new Error(`AI_SERVICE_URL is not a valid URL: ${aiServiceUrl}`);
+    }
+    throw e;
+  }
+}
+
 export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -20,7 +53,7 @@ export const config = {
     connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '5000', 10),
   },
   aiService: {
-    url: process.env.AI_SERVICE_URL || 'http://localhost:8000',
+    url: aiServiceUrl,
   },
   cors: {
     origins: process.env.CORS_ORIGINS
@@ -42,4 +75,7 @@ export const config = {
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
   },
   logLevel: process.env.LOG_LEVEL || 'info',
+  stock: {
+    lowThreshold: parseInt(process.env.LOW_STOCK_THRESHOLD || '10', 10),
+  },
 };
