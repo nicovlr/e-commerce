@@ -78,4 +78,5 @@ export const config = {
   stock: {
     lowThreshold: parseInt(process.env.LOW_STOCK_THRESHOLD || '10', 10),
   },
+  websiteUrl: process.env.WEBSITE_URL || 'http://localhost:3001',
 };

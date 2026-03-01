@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { logger } from '../config/logger';
 import { AIService } from '../services/AIService';
 
 interface PredictBody {
@@ -18,7 +19,8 @@ export class AIController {
       }
       const prediction = await this.aiService.getPrediction(Number(productId));
       res.json(prediction);
-    } catch {
+    } catch (error) {
+      logger.error({ err: error }, 'AI prediction request failed');
       res.status(503).json({
         error: 'AI service unavailable',
         message: 'The demand prediction service is currently offline',
@@ -30,7 +32,8 @@ export class AIController {
     try {
       const alerts = await this.aiService.getStockAlerts();
       res.json(alerts);
-    } catch {
+    } catch (error) {
+      logger.error({ err: error }, 'AI stock alerts request failed');
       res.status(503).json({
         error: 'AI service unavailable',
         message: 'The stock alert service is currently offline',

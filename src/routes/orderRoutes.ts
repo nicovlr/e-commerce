@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { OrderController } from '../controllers/OrderController';
 import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
-import { validateCheckout, validateId, validateOrder, validatePagination } from '../middleware/validationMiddleware';
+import { validateCheckout, validateId, validateOrder, validateOrderStatus, validatePagination } from '../middleware/validationMiddleware';
 
 export const createOrderRoutes = (controller: OrderController): Router => {
   const router = Router();
@@ -141,7 +141,7 @@ export const createOrderRoutes = (controller: OrderController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/my-orders', authMiddleware, controller.getUserOrders);
+  router.get('/my-orders', authMiddleware, validatePagination, controller.getUserOrders);
 
   /**
    * @swagger
@@ -247,7 +247,7 @@ export const createOrderRoutes = (controller: OrderController): Router => {
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.patch('/:id/status', authMiddleware, requireStaff, validateId, controller.updateStatus);
+  router.patch('/:id/status', authMiddleware, requireStaff, validateId, validateOrderStatus, controller.updateStatus);
 
   return router;
 };

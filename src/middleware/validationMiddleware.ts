@@ -19,7 +19,7 @@ export const validateProduct = [
 ];
 
 export const validateRegister = [
-  body('email').isEmail().withMessage('Valid email is required'),
+  body('email').isEmail().withMessage('Valid email is required').isLength({ max: 255 }).withMessage('Email must be under 255 characters'),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters')
@@ -69,6 +69,24 @@ export const validateId = [
 
 export const validatePagination = [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
+  handleValidationErrors,
+];
+
+export const validateRoleUpdate = [
+  body('role').isIn(['customer', 'manager', 'admin']).withMessage('Role must be one of: customer, manager, admin'),
+  handleValidationErrors,
+];
+
+export const validateOrderStatus = [
+  body('status').isIn(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).withMessage('Invalid order status'),
+  handleValidationErrors,
+];
+
+export const validateAnalyticsQuery = [
+  query('startDate').optional().isISO8601().withMessage('startDate must be a valid date (YYYY-MM-DD)'),
+  query('endDate').optional().isISO8601().withMessage('endDate must be a valid date (YYYY-MM-DD)'),
+  query('granularity').optional().isIn(['day', 'week', 'month']).withMessage('Granularity must be one of: day, week, month'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   handleValidationErrors,
 ];

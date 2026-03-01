@@ -22,7 +22,7 @@ export class AnalyticsService {
       ? (granStr as 'day' | 'week' | 'month')
       : 'day';
     const limit =
-      typeof raw.limit === 'string' ? parseInt(raw.limit, 10) : undefined;
+      typeof raw.limit === 'string' ? Math.min(parseInt(raw.limit, 10), 100) : undefined;
 
     return { startDate, endDate, granularity, limit };
   }

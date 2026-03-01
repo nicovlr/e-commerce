@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 
 import { Category } from '../models/Category';
+import { Delivery } from '../models/Delivery';
 import { Order } from '../models/Order';
 import { OrderItem } from '../models/OrderItem';
 import { Product } from '../models/Product';
@@ -9,6 +10,7 @@ import { SalesRecord } from '../models/SalesRecord';
 import { User } from '../models/User';
 import { InitialSchema1709000000000 } from '../migrations/1709000000000-InitialSchema';
 import { AddPaymentFields1709100000000 } from '../migrations/1709100000000-AddPaymentFields';
+import { AddDeliveries1709200000000 } from '../migrations/1709200000000-AddDeliveries';
 
 dotenv.config();
 
@@ -27,8 +29,8 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'ecommerce',
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',
-  entities: [User, Product, Category, Order, OrderItem, SalesRecord],
-  migrations: [InitialSchema1709000000000, AddPaymentFields1709100000000],
+  entities: [User, Product, Category, Order, OrderItem, SalesRecord, Delivery],
+  migrations: [InitialSchema1709000000000, AddPaymentFields1709100000000, AddDeliveries1709200000000],
   subscribers: [],
   extra: {
     max: 20,

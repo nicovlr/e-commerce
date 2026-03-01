@@ -4,6 +4,7 @@ import { AIController } from '../controllers/AIController';
 import { AnalyticsController } from '../controllers/AnalyticsController';
 import { AuthController } from '../controllers/AuthController';
 import { CategoryController } from '../controllers/CategoryController';
+import { DeliveryController } from '../controllers/DeliveryController';
 import { OrderController } from '../controllers/OrderController';
 import { ProductController } from '../controllers/ProductController';
 import { UserController } from '../controllers/UserController';
@@ -12,6 +13,7 @@ import { createAIRoutes } from './aiRoutes';
 import { createAnalyticsRoutes } from './analyticsRoutes';
 import { createAuthRoutes } from './authRoutes';
 import { createCategoryRoutes } from './categoryRoutes';
+import { createDeliveryRoutes } from './deliveryRoutes';
 import { createOrderRoutes } from './orderRoutes';
 import { createProductRoutes } from './productRoutes';
 import { createUserRoutes } from './userRoutes';
@@ -24,6 +26,7 @@ export const createApiRoutes = (
   aiController: AIController,
   userController: UserController,
   analyticsController: AnalyticsController,
+  deliveryController: DeliveryController,
 ): Router => {
   const router = Router();
 
@@ -34,6 +37,7 @@ export const createApiRoutes = (
   router.use('/ai', createAIRoutes(aiController));
   router.use('/users', createUserRoutes(userController));
   router.use('/analytics', createAnalyticsRoutes(analyticsController));
+  router.use('/deliveries', createDeliveryRoutes(deliveryController));
 
   return router;
 };

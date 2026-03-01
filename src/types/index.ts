@@ -67,6 +67,15 @@ export interface ShippingAddress {
   country: string;
 }
 
+export enum DeliveryStatus {
+  PREPARING = 'preparing',
+  SHIPPED = 'shipped',
+  IN_TRANSIT = 'in_transit',
+  OUT_FOR_DELIVERY = 'out_for_delivery',
+  DELIVERED = 'delivered',
+  FAILED = 'failed',
+}
+
 export enum UserRole {
   CUSTOMER = 'customer',
   MANAGER = 'manager',

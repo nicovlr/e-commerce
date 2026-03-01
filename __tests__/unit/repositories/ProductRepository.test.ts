@@ -78,6 +78,7 @@ describe('ProductRepository', () => {
       const mockQueryBuilder = {
         update: jest.fn().mockReturnThis(),
         set: jest.fn().mockReturnThis(),
+        setParameter: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         execute: jest.fn().mockResolvedValue({ affected: 1 }),
       };
@@ -94,6 +95,7 @@ describe('ProductRepository', () => {
       const mockQueryBuilder = {
         update: jest.fn().mockReturnThis(),
         set: jest.fn().mockReturnThis(),
+        setParameter: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         execute: jest.fn().mockResolvedValue({ affected: 0 }),
       };

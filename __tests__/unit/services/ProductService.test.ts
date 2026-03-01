@@ -95,16 +95,18 @@ describe('ProductService', () => {
 
   describe('deleteProduct', () => {
     it('should return true when product is deleted', async () => {
-      mockProductRepository.delete.mockResolvedValue(true);
+      mockProductRepository.findById.mockResolvedValue(mockProduct as Product);
+      mockProductRepository.update.mockResolvedValue({ ...mockProduct, isActive: false } as Product);
 
       const result = await productService.deleteProduct(1);
 
-      expect(mockProductRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockProductRepository.findById).toHaveBeenCalledWith(1);
+      expect(mockProductRepository.update).toHaveBeenCalledWith(1, { isActive: false });
       expect(result).toBe(true);
     });
 
     it('should return false when product does not exist', async () => {
-      mockProductRepository.delete.mockResolvedValue(false);
+      mockProductRepository.findById.mockResolvedValue(null);
 
       const result = await productService.deleteProduct(999);
 

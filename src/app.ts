@@ -13,17 +13,20 @@ import { AIController } from './controllers/AIController';
 import { AnalyticsController } from './controllers/AnalyticsController';
 import { AuthController } from './controllers/AuthController';
 import { CategoryController } from './controllers/CategoryController';
+import { DeliveryController } from './controllers/DeliveryController';
 import { OrderController } from './controllers/OrderController';
 import { ProductController } from './controllers/ProductController';
 import { UserController } from './controllers/UserController';
 import { WebhookController } from './controllers/WebhookController';
 import { errorMiddleware } from './middleware/errorMiddleware';
 import { Category } from './models/Category';
+import { Delivery } from './models/Delivery';
 import { Order } from './models/Order';
 import { Product } from './models/Product';
 import { User } from './models/User';
 import { AnalyticsRepository } from './repositories/AnalyticsRepository';
 import { CategoryRepository } from './repositories/CategoryRepository';
+import { DeliveryRepository } from './repositories/DeliveryRepository';
 import { OrderRepository } from './repositories/OrderRepository';
 import { ProductRepository } from './repositories/ProductRepository';
 import { UserRepository } from './repositories/UserRepository';
@@ -34,6 +37,7 @@ import { AIService } from './services/AIService';
 import { AnalyticsService } from './services/AnalyticsService';
 import { AuthService } from './services/AuthService';
 import { CategoryService } from './services/CategoryService';
+import { DeliveryService } from './services/DeliveryService';
 import { OrderService } from './services/OrderService';
 import { PaymentService } from './services/PaymentService';
 import { PostHogService } from './services/PostHogService';
@@ -83,6 +87,7 @@ export function createApp(): Application {
   const productRepository = new ProductRepository(AppDataSource.getRepository(Product));
   const orderRepository = new OrderRepository(AppDataSource.getRepository(Order));
   const categoryRepository = new CategoryRepository(AppDataSource.getRepository(Category));
+  const deliveryRepository = new DeliveryRepository(AppDataSource.getRepository(Delivery));
   const analyticsRepository = new AnalyticsRepository(AppDataSource);
 
   // Dependency Injection - Services
@@ -94,6 +99,7 @@ export function createApp(): Application {
   const categoryService = new CategoryService(categoryRepository);
   const aiService = new AIService();
   const userService = new UserService(userRepository);
+  const deliveryService = new DeliveryService(deliveryRepository, orderRepository);
   const analyticsService = new AnalyticsService(analyticsRepository);
 
   // Dependency Injection - Controllers
@@ -103,6 +109,7 @@ export function createApp(): Application {
   const categoryController = new CategoryController(categoryService);
   const aiController = new AIController(aiService);
   const userController = new UserController(userService);
+  const deliveryController = new DeliveryController(deliveryService);
   const analyticsController = new AnalyticsController(analyticsService);
   const webhookController = new WebhookController(paymentService, orderService);
 
@@ -165,6 +172,7 @@ export function createApp(): Application {
       aiController,
       userController,
       analyticsController,
+      deliveryController,
     ),
   );
 

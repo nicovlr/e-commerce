@@ -35,6 +35,7 @@ coverage/
 npm-debug.log*
 
 # Python
+__pycache__/
 ai-service/__pycache__/
 ai-service/.venv/
 ai-service/venv/

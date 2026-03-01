@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 
 import { AnalyticsController } from '../controllers/AnalyticsController';
 import { authMiddleware, requireStaff } from '../middleware/authMiddleware';
+import { validateAnalyticsQuery } from '../middleware/validationMiddleware';
 
 const analyticsLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -77,7 +78,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/summary', authMiddleware, requireStaff, controller.getSummary);
+  router.get('/summary', authMiddleware, requireStaff, validateAnalyticsQuery, controller.getSummary);
 
   /**
    * @swagger
@@ -134,7 +135,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/revenue', authMiddleware, requireStaff, controller.getRevenue);
+  router.get('/revenue', authMiddleware, requireStaff, validateAnalyticsQuery, controller.getRevenue);
 
   /**
    * @swagger
@@ -190,7 +191,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/top-products', authMiddleware, requireStaff, controller.getTopProducts);
+  router.get('/top-products', authMiddleware, requireStaff, validateAnalyticsQuery, controller.getTopProducts);
 
   /**
    * @swagger
@@ -239,7 +240,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/orders', authMiddleware, requireStaff, controller.getOrders);
+  router.get('/orders', authMiddleware, requireStaff, validateAnalyticsQuery, controller.getOrders);
 
   /**
    * @swagger
@@ -293,7 +294,7 @@ export const createAnalyticsRoutes = (
    *             schema:
    *               $ref: '#/components/schemas/Error'
    */
-  router.get('/customers', authMiddleware, requireStaff, controller.getCustomers);
+  router.get('/customers', authMiddleware, requireStaff, validateAnalyticsQuery, controller.getCustomers);
 
   /**
    * @swagger
